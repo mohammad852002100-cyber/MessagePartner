@@ -2,7 +2,7 @@ import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 /* ═══ Supabase Database ═══ */
 const SB_URL = "https://ldtgnvuadqtwaalbcasu.supabase.co";
@@ -47,24 +47,24 @@ var sA = async function(u, a) { return sbSet("r_answers", u, a); };
 
 /* Saved accounts — device-local only */
 var gSaved = async function() {
-  try { var r = await window.storage.get("r_saved", false); return r ? JSON.parse(r.value) : []; }
+  try { var r = localStorage.getItem("r_saved"); return r ? JSON.parse(r) : []; }
   catch (e) { return []; }
 };
 var sSaved = async function(a) {
-  try { await window.storage.set("r_saved", JSON.stringify(a), false); return true; }
+  try { localStorage.setItem("r_saved", JSON.stringify(a)); return true; }
   catch (e) { return false; }
 };
 /* Session persistence — stay logged in */
 var gSession = async function() {
-  try { var r = await window.storage.get("r_session", false); return r ? JSON.parse(r.value) : null; }
+  try { var r = localStorage.getItem("r_session"); return r ? JSON.parse(r) : null; }
   catch (e) { return null; }
 };
 var sSession = async function(u) {
-  try { await window.storage.set("r_session", JSON.stringify(u), false); return true; }
+  try { localStorage.setItem("r_session", JSON.stringify(u)); return true; }
   catch (e) { return false; }
 };
 var clearSession = async function() {
-  try { await window.storage.set("r_session", JSON.stringify(null), false); } catch (e) {}
+  try { localStorage.removeItem("r_session"); } catch (e) {}
 };
 
 /* ═══ Colors — Confident & Vibrant ═══ */
@@ -132,6 +132,13 @@ div[style*="cursor: pointer"]:active{transform:scale(0.98)!important;opacity:0.9
 .sg>*:nth-child(3){animation-delay:80ms}.sg>*:nth-child(4){animation-delay:120ms}
 .sg>*:nth-child(5){animation-delay:160ms}.sg>*:nth-child(6){animation-delay:200ms}
 .sg>*:nth-child(7){animation-delay:240ms}.sg>*:nth-child(8){animation-delay:280ms}
+/* Premium Hover Effects (Desktop only) to prevent mobile double-tap bugs */
+@media (hover: hover) {
+  .glass-card:hover { background: rgba(255,255,255,0.95)!important; border-color: rgba(255,255,255,1)!important; }
+  .glass-del:hover { background: rgba(217,68,68,0.1)!important; color: #d94444!important; }
+  .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(192,122,62,0.4)!important; }
+  .pwa-btn:hover { background: rgba(255,255,255,1)!important; }
+}
 /* Custom range slider */
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;
   background:#dce1e8;border-radius:99px;outline:none}
@@ -463,50 +470,51 @@ function PWABanner({ pwa }) {
   if (pwa.isStandalone || !pwa.canInstall || dismissed) return null;
 
   return (
-    <div style={{
-      background: "rgba(255,255,255,.95)", backdropFilter: "blur(10px)",
-      borderRadius: 16, padding: "16px 18px", marginBottom: 20,
-      border: "1px solid " + C.gold + "30", boxShadow: "0 4px 20px rgba(0,0,0,.08)",
-      direction: "rtl"
+    <div className="fu" style={{
+      background: "rgba(255,255,255,0.6)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)",
+      borderRadius: 24, padding: "20px", marginBottom: 24,
+      border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 10px 30px rgba(22,45,80,0.05)",
+      direction: "rtl", position: "relative", overflow: "hidden"
     }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 22 }}>📲</span>
-          <span style={{ fontWeight: 800, fontSize: 14, color: C.pri }}>حمّل التطبيق</span>
+      {/* Subtle glow inside the banner */}
+      <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, background: "rgba(240,160,80,0.2)", filter: "blur(30px)", pointerEvents: "none" }} />
+
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12, position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ background: "linear-gradient(135deg, #e07832, #f5a05f)", borderRadius: 12, width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(224,120,50,0.25)" }}>📲</div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 15, color: C.pri, marginBottom: 2 }}>تطبيق الهاتف</div>
+            <div style={{ fontSize: 12, color: C.txM }}>تجربة أسرع وأكثر سلاسة</div>
+          </div>
         </div>
         <button onClick={function() { setDismissed(true); }} style={{
-          background: "none", border: "none", cursor: "pointer", fontSize: 16,
-          color: C.txL, padding: 4, lineHeight: 1
+          background: "rgba(22,45,80,0.05)", border: "1px solid rgba(22,45,80,0.1)", borderRadius: "50%", cursor: "pointer", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
+          color: C.txM, transition: "all 0.2s"
         }}>✕</button>
       </div>
 
       {pwa.isIOS ? (
-        <div>
-          <p style={{ fontSize: 13, color: C.txM, lineHeight: 1.8, margin: "0 0 12px" }}>
-            أضف التطبيق للشاشة الرئيسية لتجربة أسرع وأسهل:
-          </p>
-          <div style={{ background: C.pri + "06", borderRadius: 10, padding: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-              <span style={{ background: C.pri, color: "#fff", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>1</span>
-              <span style={{ fontSize: 13, color: C.tx }}>اضغط على زر المشاركة <span style={{ fontSize: 16 }}>⬆️</span> أسفل الشاشة</span>
+        <div style={{ position: "relative" }}>
+          <div style={{ background: "rgba(255,255,255,0.5)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 16, padding: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <span style={{ background: C.pri, color: "#fff", borderRadius: 8, width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>1</span>
+              <span style={{ fontSize: 13, color: C.pri }}>اضغط على زر المشاركة <span style={{ fontSize: 16 }}>⬆️</span></span>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ background: C.pri, color: "#fff", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>2</span>
-              <span style={{ fontSize: 13, color: C.tx }}>اختر <strong>إضافة إلى الشاشة الرئيسية</strong> ➕</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ background: C.pri, color: "#fff", borderRadius: 8, width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>2</span>
+              <span style={{ fontSize: 13, color: C.pri }}>اختر <strong>إضافة للشاشة الرئيسية</strong> ➕</span>
             </div>
           </div>
         </div>
       ) : (
-        <div>
-          <p style={{ fontSize: 13, color: C.txM, lineHeight: 1.8, margin: "0 0 10px" }}>
-            حمّل التطبيق على هاتفك لفتحه بشكل أسرع بدون متصفح
-          </p>
-          <button onClick={pwa.triggerInstall} style={{
-            width: "100%", padding: "11px 0", borderRadius: 10, border: "none",
-            background: "linear-gradient(135deg," + C.gold + "," + C.goldL + ")",
-            color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer",
-            fontFamily: "'Tajawal',sans-serif"
-          }}>⬇️ تثبيت التطبيق</button>
+        <div style={{ position: "relative" }}>
+          <button onClick={pwa.triggerInstall} className="pwa-btn" style={{
+            width: "100%", padding: "14px 0", borderRadius: 14,
+            background: "rgba(255,255,255,0.8)", border: "1px solid rgba(255,255,255,1)",
+            color: C.pri, fontWeight: 800, fontSize: 14, cursor: "pointer",
+            fontFamily: "'Tajawal',sans-serif", transition: "all 0.2s",
+            boxShadow: "0 4px 12px rgba(22,45,80,0.05)"
+          }}>⬇️ تثبيت التطبيق الآن</button>
         </div>
       )}
     </div>
@@ -555,80 +563,101 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ height: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(150deg, #1e3c72 0%, #2a5298 30%, #4a90d9 60%, #74b9ff 85%, #a8d8ea 100%)", display: "flex", flexDirection: "column", overflow: "hidden", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div style={{ height: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", backgroundColor: "#f4f7fa", position: "fixed", inset: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <style>{CSS_TEXT}</style>
 
-      {/* Top bar */}
-      <div style={{ flexShrink: 0, padding: "10px 20px 0", paddingTop: "calc(10px + env(safe-area-inset-top))", textAlign: "center" }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,.4)", letterSpacing: 1.5 }}>مرحباً بك</span>
+      {/* Bright Ambient Background Glows */}
+      <div style={{ position: "absolute", top: "-20%", right: "-10%", width: "70vw", height: "70vw", background: "radial-gradient(circle, rgba(250,180,80,0.25) 0%, transparent 60%)", filter: "blur(60px)", pointerEvents: "none", animation: "pl 8s infinite alternate" }} />
+      <div style={{ position: "absolute", bottom: "-20%", left: "-10%", width: "80vw", height: "80vw", background: "radial-gradient(circle, rgba(100,190,255,0.2) 0%, transparent 60%)", filter: "blur(60px)", pointerEvents: "none", animation: "pl 10s infinite alternate-reverse" }} />
+
+      {/* Subtle branding at top */}
+      <div className="si" style={{ position: "absolute", top: 32, left: 0, right: 0, textAlign: "center", zIndex: 10, pointerEvents: "none" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: C.txL, letterSpacing: 4, textTransform: "uppercase" }}>شريكك في اكتشاف رسالتك</span>
       </div>
 
       {/* Scrollable content area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 24px", maxWidth: 420, width: "100%", margin: "0 auto", overflow: "auto" }}>
+      <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyItems: "center", padding: "24px", paddingTop: "12vh" }}>
+        <div style={{ width: "100%", maxWidth: 400, display: "flex", flexDirection: "column", gap: 24, paddingBottom: 40 }}>
 
-        {/* Logo */}
-        <div className="si" style={{ textAlign: "center", marginBottom: 28, flexShrink: 0 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 20, margin: "0 auto 14px", background: "rgba(255,255,255,.18)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, border: "1px solid rgba(255,255,255,.25)", boxShadow: "0 8px 32px rgba(0,0,0,.1)" }}>🧭</div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", marginBottom: 6 }}>شريكك في اكتشاف رسالتك</h1>
-          <p style={{ color: "rgba(255,255,255,.5)", fontSize: 13 }}>سجّل دخولك لتبدأ رحلتك</p>
-        </div>
-
-        <PWABanner pwa={pwa} />
-
-        {/* Saved accounts */}
-        {saved.length > 0 && (
-          <div style={{ marginBottom: 20, flexShrink: 0 }}>
-            {saved.map(function(a) {
-              return (
-                <div key={a.u} onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, marginBottom: 6, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", backdropFilter: "blur(8px)" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 11, background: "linear-gradient(135deg, #c07a3e, #d49358)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 15 }}>{a.n ? a.n[0] : "?"}</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>{a.n}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>@{a.u}</div>
-                  </div>
-                  <button onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "rgba(255,255,255,.3)", padding: 4 }}>✕</button>
-                </div>
-              );
-            })}
-            <div style={{ textAlign: "center", margin: "12px 0 0" }}>
-              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent)", margin: "0 20px 10px" }} />
-              <span style={{ fontSize: 12, color: "rgba(255,255,255,.35)" }}>أو سجّل بحساب آخر</span>
+          {/* Elegant Header */}
+          <div className="si" style={{ textAlign: "center", marginBottom: 8 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 72, height: 72, borderRadius: 24, background: "rgba(255,255,255,0.8)", border: "1px solid #fff", boxShadow: "0 12px 32px rgba(22,45,80,0.06)", marginBottom: 24, backdropFilter: "blur(12px)" }}>
+              <span style={{ fontSize: 36, filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))" }}>🧭</span>
             </div>
+            <h1 style={{ fontSize: 30, fontWeight: 900, color: C.pri, marginBottom: 6, letterSpacing: -0.5 }}>مرحباً بك</h1>
+            <p style={{ color: C.txM, fontSize: 15, fontWeight: 500 }}>استكمل رحلتك نحو المعنى والأثر</p>
           </div>
-        )}
 
-        {/* Form */}
-        <div style={{ flexShrink: 0 }}>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>اسم المستخدم</label>
-            <input type="text" value={un || ""} onChange={function(e) { sUn(e.target.value); }} placeholder="اكتب اسم المستخدم..."
-              style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
-              onFocus={function(e) { e.target.style.borderColor = "rgba(74,144,217,.6)"; }}
-              onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
+          <PWABanner pwa={pwa} />
+
+          {/* Saved Accounts - Premium Cards */}
+          {saved.length > 0 && (
+            <div className="fu" style={{ animationDelay: "100ms" }}>
+              {saved.map(function(a) {
+                return (
+                  <div key={a.u} className="glass-card" onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 20, marginBottom: 10, background: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.8)", cursor: "pointer", transition: "all 0.2s", backdropFilter: "blur(10px)", boxShadow: "0 8px 24px rgba(22,45,80,0.03)" }}>
+                    <div style={{ width: 46, height: 46, borderRadius: 14, background: "linear-gradient(135deg, #e07832, #f5a05f)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 18, boxShadow: "0 4px 12px rgba(224,120,50,0.25)" }}>{a.n ? a.n[0] : "?"}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 800, fontSize: 15, color: C.pri, marginBottom: 2 }}>{a.n}</div>
+                      <div style={{ fontSize: 12, color: C.txL, letterSpacing: 0.5 }}>@{a.u}</div>
+                    </div>
+                    <button className="glass-del" onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "rgba(22,45,80,0.05)", border: "none", borderRadius: "50%", cursor: "pointer", width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", color: C.txM, transition: "all 0.2s" }}>✕</button>
+                  </div>
+                );
+              })}
+              <div style={{ textAlign: "center", margin: "20px 0 10px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(22,45,80,0.08))" }} />
+                <span style={{ fontSize: 12, color: C.txL, fontWeight: 600 }}>أو سجل بحساب آخر</span>
+                <div style={{ flex: 1, height: 1, background: "linear-gradient(270deg, transparent, rgba(22,45,80,0.08))" }} />
+              </div>
+            </div>
+          )}
+
+          {/* Premium Form Container */}
+          <div className="fu" style={{ animationDelay: "150ms", background: "rgba(255,255,255,0.5)", backdropFilter: "blur(30px)", WebkitBackdropFilter: "blur(30px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: 32, padding: "32px 24px", boxShadow: "0 24px 60px rgba(22,45,80,0.06)" }}>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.txM, marginBottom: 8, paddingRight: 4 }}>اسم المستخدم</label>
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "rgba(22,45,80,0.3)", pointerEvents: "none", display: "flex" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <input type="text" value={un || ""} onChange={function(e) { sUn(e.target.value); }} placeholder="اكتب اسم المستخدم"
+                  style={{ width: "100%", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.9)", borderRadius: 18, padding: "16px 44px 16px 16px", fontSize: 15, direction: "rtl", color: C.pri, outline: "none", transition: "all 0.3s", boxShadow: "inset 0 2px 6px rgba(22,45,80,0.02)" }}
+                  onFocus={function(e) { e.target.style.borderColor = C.gold; e.target.style.boxShadow = "0 0 0 4px rgba(192,122,62,0.15)"; e.target.style.background = "#fff"; e.target.previousSibling.style.color = C.gold; }}
+                  onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,0.9)"; e.target.style.boxShadow = "inset 0 2px 6px rgba(22,45,80,0.02)"; e.target.style.background = "rgba(255,255,255,0.8)"; e.target.previousSibling.style.color = "rgba(22,45,80,0.3)"; }} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 28 }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: C.txM, marginBottom: 8, paddingRight: 4 }}>كلمة المرور</label>
+              <div style={{ position: "relative" }}>
+                <div style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "rgba(22,45,80,0.3)", pointerEvents: "none", display: "flex" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <input type="password" value={pw || ""} onChange={function(e) { sPw(e.target.value); }} placeholder="اكتب كلمة المرور"
+                  style={{ width: "100%", background: "rgba(255,255,255,0.8)", border: "1.5px solid rgba(255,255,255,0.9)", borderRadius: 18, padding: "16px 44px 16px 16px", fontSize: 15, direction: "rtl", color: C.pri, outline: "none", transition: "all 0.3s", boxShadow: "inset 0 2px 6px rgba(22,45,80,0.02)" }}
+                  onFocus={function(e) { e.target.style.borderColor = C.gold; e.target.style.boxShadow = "0 0 0 4px rgba(192,122,62,0.15)"; e.target.style.background = "#fff"; e.target.previousSibling.style.color = C.gold; }}
+                  onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,0.9)"; e.target.style.boxShadow = "inset 0 2px 6px rgba(22,45,80,0.02)"; e.target.style.background = "rgba(255,255,255,0.8)"; e.target.previousSibling.style.color = "rgba(22,45,80,0.3)"; }} />
+              </div>
+            </div>
+
+            {err && <div style={{ background: "rgba(217,68,68,0.1)", color: "#d94444", borderRadius: 14, padding: "12px 16px", fontSize: 13, marginBottom: 20, fontWeight: 700, border: "1px solid rgba(217,68,68,0.2)", display: "flex", alignItems: "center", gap: 8 }}><span style={{fontSize:16}}>⚠️</span> {err}</div>}
+            
+            <button className="primary-btn" onClick={function() { doLogin(un, pw); }} disabled={ld}
+              style={{
+                width: "100%", padding: "16px 0", borderRadius: 18, border: "none",
+                background: "linear-gradient(135deg, #e07832, #f5a05f)", color: "#fff",
+                fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
+                fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.7 : 1,
+                boxShadow: "0 8px 24px rgba(224,120,50,0.3)",
+                transition: "all 0.3s"
+              }}
+              >
+              {ld ? "جارٍ التحقق..." : "الدخول إلى النظام"}
+            </button>
           </div>
-          <div style={{ marginBottom: 18 }}>
-            <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>كلمة المرور</label>
-            <input type="password" value={pw || ""} onChange={function(e) { sPw(e.target.value); }} placeholder="اكتب كلمة المرور..."
-              style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
-              onFocus={function(e) { e.target.style.borderColor = "rgba(74,144,217,.6)"; }}
-              onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
-          </div>
-          {err && <div style={{ background: "rgba(217,68,68,.15)", color: "#ff8080", borderRadius: 12, padding: "10px 14px", fontSize: 13, marginBottom: 12, fontWeight: 600, border: "1px solid rgba(217,68,68,.2)" }}>{err}</div>}
-          <button onClick={function() { doLogin(un, pw); }} disabled={ld}
-            style={{
-              width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
-              background: "linear-gradient(135deg, #2a5298, #4a90d9)", color: "#fff",
-              fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
-              fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.6 : 1,
-              boxShadow: "0 4px 20px rgba(42,82,152,.4)",
-              transition: "all .15s"
-            }}>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك"}</button>
         </div>
-      </div>
-
-      {/* Bottom */}
-      <div style={{ flexShrink: 0, padding: "12px 20px", paddingBottom: "calc(12px + env(safe-area-inset-bottom))", textAlign: "center" }}>
-        <p style={{ fontSize: 11, color: "rgba(255,255,255,.25)" }}>رحلة اكتشاف الذات تبدأ من هنا</p>
       </div>
     </div>
   );
@@ -663,7 +692,6 @@ function LsnV({ lesson, onDone, onBack }) {
 /* ═══ Exercise View ═══ */
 function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   const [a, sA2] = useState(saved || {});
-  const aRef = useRef(saved || {});
   const [toast, sT] = useState("");
   const tm = useRef(null);
   const [aiSt, sAiSt] = useState(saved && saved.ai_result ? "done" : "idle");
@@ -680,14 +708,15 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   }, [ex.type, user]);
 
   function up(k, v) {
-    var n = Object.assign({}, aRef.current, { [k]: v });
-    aRef.current = n;
-    sA2(n);
-    clearTimeout(tm.current);
-    tm.current = setTimeout(function() { onSave(aRef.current); }, 800);
+    sA2(function(prev) {
+      var n = Object.assign({}, prev, { [k]: v });
+      clearTimeout(tm.current);
+      tm.current = setTimeout(function() { onSave(n); }, 800);
+      return n;
+    });
   }
 
-  function hSave() { onSave(aRef.current); sT("✅ تم حفظ إجاباتك بنجاح"); }
+  function hSave() { onSave(a); sT("✅ تم حفظ إجاباتك بنجاح"); }
 
   function renderEx() {
     if (ex.type === "diag") {
@@ -847,8 +876,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           sAiRes(result);
           sAiSt("done");
           // Save result
-          var n = Object.assign({}, aRef.current, { ai_result: result });
-          aRef.current = n;
+          var n = Object.assign({}, a, { ai_result: result });
           sA2(n);
           onSave(n);
         }).catch(function() { sAiSt("error"); });
@@ -1625,7 +1653,7 @@ export default function App() {
       theme.name = "theme-color";
       document.head.appendChild(theme);
     }
-    theme.content = "#1e3c72";
+    theme.content = "#0a1628";
     // Mobile-first CSS fixes
     var style = document.createElement("style");
     style.textContent = [
@@ -1640,29 +1668,28 @@ export default function App() {
   /* Update theme-color when auth changes */
   useEffect(function() {
     var theme = document.querySelector('meta[name="theme-color"]');
-    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#1e3c72";
+    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#0a1628";
   }, [auth]);
 
   useEffect(function() {
+    // 1. Try restore session
     gSession().then(function(session) {
       if (session && session.username) {
-        // Use session immediately — no waiting for network
-        sAuth(session);
-        sLd(false);
-        // Refresh from Supabase in background
+        // Refresh user data from Supabase
         gU().then(function(u) {
-          if (u[session.username]) {
-            var fresh = Object.assign({ username: session.username }, u[session.username]);
-            sAuth(fresh);
-            sSession(fresh);
+          var fresh = u[session.username];
+          if (fresh) {
+            sAuth(Object.assign({ username: session.username }, fresh));
           }
-          // Ensure default users
+          // Ensure default users exist (background)
           var changed = false;
           if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
           if (!u["m7md.abu.sneneh"]) { u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
           if (changed) sU(u);
+          sLd(false);
         });
       } else {
+        // No session — ensure users exist then show login
         gU().then(function(u) {
           var changed = false;
           if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
@@ -1685,9 +1712,8 @@ export default function App() {
       var upd = Object.assign({}, u[auth.username], ch, { lastActive: Date.now() });
       u[auth.username] = upd;
       sU(u).then(function(ok) {
-        var newAuth = Object.assign({}, auth, upd);
-        sAuth(newAuth);
-        sSession(newAuth);
+        if (ok) { console.log("✅ User updated:", auth.username); }
+        sAuth(function(p) { return Object.assign({}, p, upd); });
       });
     });
   }
@@ -1726,7 +1752,7 @@ export default function App() {
 
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
-  if (ld) return (<div style={{ minHeight: "100vh", background: "#1e3c72" }}><style>{CSS_TEXT}</style></div>);
+  if (ld) return (<div style={{ minHeight: "100vh", background: "#162d50" }}><style>{CSS_TEXT}</style></div>);
 
   if (!auth) return (<Login onLogin={function(u) { sSession(u); sAuth(u); sV("dash"); }} />);
   if (auth.isAdmin) return (<Admin onLogout={doLogout} />);
