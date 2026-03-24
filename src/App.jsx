@@ -54,6 +54,18 @@ var sSaved = async function(a) {
   try { await window.storage.set("r_saved", JSON.stringify(a), false); return true; }
   catch (e) { return false; }
 };
+/* Session persistence — stay logged in */
+var gSession = async function() {
+  try { var r = await window.storage.get("r_session", false); return r ? JSON.parse(r.value) : null; }
+  catch (e) { return null; }
+};
+var sSession = async function(u) {
+  try { await window.storage.set("r_session", JSON.stringify(u), false); return true; }
+  catch (e) { return false; }
+};
+var clearSession = async function() {
+  try { await window.storage.set("r_session", JSON.stringify(null), false); } catch (e) {}
+};
 
 /* ═══ Colors ═══ */
 const C = {
@@ -67,12 +79,12 @@ const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", 
 const CSS_TEXT = `
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%}
 body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:rtl;
-  -webkit-overflow-scrolling:touch;overscroll-behavior-y:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
   padding-right:env(safe-area-inset-right);padding-left:env(safe-area-inset-left);
-  position:relative;width:100%;overflow-x:hidden}
+  width:100%;overflow-x:hidden;min-height:100%}
 textarea,input,select,button{font-family:inherit;font-size:16px;color:${C.tx}}
 input[type=text],input[type=password],textarea,select{font-size:16px!important;color:${C.tx}!important;
   -webkit-text-fill-color:${C.tx}!important;
@@ -82,7 +94,7 @@ input[type=text],input[type=password],textarea,select{font-size:16px!important;c
 *::-webkit-scrollbar{display:none}
 /* Native touch feel */
 button{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-html,body{overscroll-behavior:none;touch-action:manipulation}
+html,body{overscroll-behavior-y:contain;touch-action:manipulation}
 img,svg{max-width:100%;height:auto}
 /* No text select on UI — only on content */
 h1,h2,h3,h4,label,nav,button,span[style]{-webkit-user-select:none;user-select:none}
@@ -514,7 +526,9 @@ function Login({ onLogin }) {
           var exists = ac.find(function(a) { return a.u === k; });
           var newAc = exists ? ac.map(function(a) { return a.u === k ? { u: k, p: p.trim(), n: usr.name } : a; }) : ac.concat([{ u: k, p: p.trim(), n: usr.name }]);
           sSaved(newAc).then(function() {
-            onLogin(Object.assign({ username: k }, usr));
+            var sessionData = Object.assign({ username: k }, usr);
+            sSession(sessionData);
+            onLogin(sessionData);
             sLd(false);
           });
         });
@@ -530,12 +544,12 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(155deg," + C.pri + "," + C.priL + " 50%," + C.gold + "40 100%)" }}>
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(145deg, #0f172a 0%, #1e3a5f 35%, #2563eb 65%, #d97706 100%)" }}>
       <style>{CSS_TEXT}</style>
       <div className="si" style={{ maxWidth: 440, width: "100%", background: "rgba(255,255,255,.97)", borderRadius: 22, padding: "36px 30px", boxShadow: "0 28px 72px rgba(0,0,0,.25)" }}>
         <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, margin: "0 auto 12px", background: "linear-gradient(135deg," + C.pri + "," + C.priL + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30 }}>🧭</div>
-          <h1 style={{ fontSize: 22, fontWeight: 900, color: C.pri, marginBottom: 3 }}>رسالتك في الحياة</h1>
+          <div style={{ width: 64, height: 64, borderRadius: 16, margin: "0 auto 12px", background: "linear-gradient(135deg, #2563eb, #d97706)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, boxShadow: "0 6px 20px rgba(37,99,235,.3)" }}>🧭</div>
+          <h1 style={{ fontSize: 20, fontWeight: 900, color: C.pri, marginBottom: 3 }}>شريكك في اكتشاف رسالتك</h1>
           <p style={{ color: C.txL, fontSize: 13 }}>سجّل دخولك لتكمل رحلتك</p>
         </div>
 
@@ -1573,27 +1587,40 @@ export default function App() {
   }, []);
 
   useEffect(function() {
-    gU().then(function(u) {
-      var changed = false;
-      if (!u.admin) {
-        u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
-        changed = true;
-      }
-      if (!u["m7md.abu.sneneh"]) {
-        u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
-        changed = true;
-      }
-      if (changed) {
-        sU(u).then(function() {
-          console.log("✅ Users initialized in Supabase");
+    // 1. Try restore session
+    gSession().then(function(session) {
+      if (session && session.username) {
+        // Refresh user data from Supabase
+        gU().then(function(u) {
+          var fresh = u[session.username];
+          if (fresh) {
+            sAuth(Object.assign({ username: session.username }, fresh));
+          }
+          // Ensure default users exist (background)
+          var changed = false;
+          if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
+          if (!u["m7md.abu.sneneh"]) { u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
+          if (changed) sU(u);
           sLd(false);
         });
       } else {
-        console.log("✅ Users loaded from Supabase:", Object.keys(u).length, "users");
-        sLd(false);
+        // No session — ensure users exist then show login
+        gU().then(function(u) {
+          var changed = false;
+          if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
+          if (!u["m7md.abu.sneneh"]) { u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
+          if (changed) sU(u);
+          sLd(false);
+        });
       }
     });
   }, []);
+
+  function doLogout() {
+    clearSession();
+    sAuth(null);
+    sV("dash");
+  }
 
   function upU(ch) {
     gU().then(function(u) {
@@ -1640,18 +1667,10 @@ export default function App() {
 
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
-  if (ld) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl", background: C.bg }}>
-      <style>{CSS_TEXT}</style>
-      <div style={{ textAlign: "center", opacity: 0.6 }}>
-        <div style={{ fontSize: 36, marginBottom: 8 }}>🧭</div>
-        <p style={{ color: C.txL, fontSize: 13 }}>جارٍ التحميل...</p>
-      </div>
-    </div>
-  );
+  if (ld) return (<div style={{ minHeight: "100vh", background: C.bg }}><style>{CSS_TEXT}</style></div>);
 
-  if (!auth) return (<Login onLogin={function(u) { sAuth(u); sV("dash"); }} />);
-  if (auth.isAdmin) return (<Admin onLogout={function() { sAuth(null); }} />);
+  if (!auth) return (<Login onLogin={function(u) { sSession(u); sAuth(u); sV("dash"); }} />);
+  if (auth.isAdmin) return (<Admin onLogout={doLogout} />);
 
   var isInner = view === "lesson" || view === "exercise";
 
@@ -1751,7 +1770,7 @@ export default function App() {
             );
           })}
           {/* Profile/logout button */}
-          <button onClick={function() { sAuth(null); }}
+          <button onClick={doLogout}
             style={{
               background: "none", border: "none", cursor: "pointer",
               display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
