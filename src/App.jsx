@@ -1,6 +1,5 @@
-import { registerSW } from 'virtual:pwa-register'
-
-registerSW({ immediate: true })
+ import { registerSW } from 'virtual:pwa-register'
+ registerSW({ immediate: true })
 
 import React, { useState, useEffect, useRef } from "react";
 
@@ -255,6 +254,33 @@ const VD = [
   { n: "التقاليد والموروث", d: "تقدير العادات الموروثة من ثقافتك ودينك وعائلتك." },
 ];
 
+const ASMA_ALLAH = [
+  { n: "الرَّحْمَٰنُ الرَّحِيمُ", kw: ["حب", "رحمة", "عطف", "حنان", "تسامح", "لين", "ود", "طيب", "لطف"] },
+  { n: "الْمَلِكُ الْقُدُّوسُ", kw: ["طهارة", "نقاء", "نظافة", "صفاء", "علو", "سمو", "رفعة", "ملك", "سيادة", "كمال"] },
+  { n: "السَّلَامُ الْمُؤْمِنُ", kw: ["سلام", "أمان", "طمأنينة", "هدوء", "سكينة", "راحة", "يقين", "ثقة", "حماية"] },
+  { n: "الْعَزِيزُ الْجَبَّارُ", kw: ["قوة", "عزة", "كرامة", "فخر", "شرف", "شجاعة", "إصلاح", "جبر", "نصر", "احترام"] },
+  { n: "الْخَالِقُ الْبَارِئُ الْمُصَوِّرُ", kw: ["إبداع", "فن", "جمال", "ابتكار", "صنع", "تطوير", "تجديد", "اختراع", "تميز"] },
+  { n: "الْغَفَّارُ التَّوَّابُ العَفُوُّ", kw: ["مغفرة", "توبة", "عفو", "مسامحة", "ستر", "تجاوز", "صفح", "غفران"] },
+  { n: "الرَّزَّاقُ الْوَهَّابُ", kw: ["عطاء", "كرم", "رزق", "وفرة", "غنى", "جود", "سخاء", "منحة", "خير"] },
+  { n: "الْعَلِيمُ الْحَكِيمُ", kw: ["علم", "حكمة", "معرفة", "وعي", "إدراك", "فهم", "بصيرة", "ذكاء", "عقل", "تعلم"] },
+  { n: "الْوَدُودُ", kw: ["صداقة", "أخوة", "قرب", "ألفة", "علاقة", "تواصل", "محبة", "انسجام"] },
+  { n: "الْحَقُّ الْعَدْلُ الْمُقْسِطُ", kw: ["حق", "عدل", "إنصاف", "صدق", "صراحة", "استقامة", "مساواة", "نزاهة"] },
+  { n: "الْقَوِيُّ الْمَتِينُ", kw: ["ثبات", "صمود", "صلابة", "تحمل", "إصرار", "صبر", "عزيمة", "إرادة"] },
+  { n: "الْوَلِيُّ النَّصِيرُ", kw: ["دعم", "سند", "مساعدة", "رعاية", "نصرة", "حماية", "عون"] },
+  { n: "النُّورُ الْهَادِي", kw: ["نور", "هداية", "إرشاد", "توجيه", "وضوح", "رؤية", "إلهام", "بيان", "دليل"] },
+  { n: "الْحَيُّ الْقَيُّومُ", kw: ["حياة", "نشاط", "حيوية", "طاقة", "قيادة", "مبادرة", "تأثير"] },
+  { n: "الْوَاسِعُ الْمُغْنِي", kw: ["سعة", "حرية", "استقلال", "انطلاق", "نمو", "غنى", "اكتفاء"] }
+];
+
+function getAsmaForValue(val) {
+  if(!val) return "اللَّهُ";
+  for (let i = 0; i < ASMA_ALLAH.length; i++) {
+    if (ASMA_ALLAH[i].kw.some(k => val.includes(k))) return ASMA_ALLAH[i].n;
+  }
+  const fallbackNames = ["الْحَيُّ الْقَيُّومُ", "الْوَاسِعُ", "الْكَرِيمُ", "الْمَجِيدُ", "الْفَتَّاحُ", "اللَّطِيفُ الْخَبِيرُ"];
+  return fallbackNames[val.length % fallbackNames.length];
+}
+
 const EX = [
   { id: 1, p: 1, title: "التشخيص الأولي", sub: "أين أنت الآن؟", mins: 20, icon: "🔍", type: "diag" },
   { id: 2, p: 1, title: "مرحلتك العمرية", sub: "تحديات وفرص مرحلتك", mins: 15, icon: "🗓️", type: "mq", qs: ["ما أكبر التحديات في مرحلتك الحالية؟", "ما الأسئلة الكبرى التي تشغلك؟", "كيف يمكن لمرحلتك أن تكون ميزة؟", "ما الشخص الذي تريد أن تصبحه؟"] },
@@ -262,6 +288,7 @@ const EX = [
   { id: 4, p: 2, title: "هدف رمي السهام", sub: "ارسم قيمك وانظر كيف تعيشها", mins: 30, icon: "🎯", type: "mq", qs: ["العمل: كيف تريد أن تكون فيه؟", "الترفيه: كيف تستمتع؟", "العلاقات: أي علاقات تريد؟", "النمو: كيف تتطور؟", "العوائق وخطوة هذا الأسبوع؟"] },
   { id: 5, p: 2, title: "عيد ميلادك الثمانين", sub: "رحلة تأملية", mins: 20, icon: "🎂", type: "mq", qs: ["ماذا يقول عنك أقرب شخص؟", "ماذا يقول شخص من عملك؟", "ما الذي ظهر وماذا تعلمت؟", "ما القيم التي يكشفها؟"] },
   { id: 6, p: 2, title: "استبيان العيش بالقيم", sub: "قارن ما تعتقد بما تعيش", mins: 20, icon: "📊", type: "vlq", domains: ["العائلة", "الشراكة العاطفية", "الأبناء", "الصداقات", "العمل", "التعليم", "الترفيه", "الروحانية", "المجتمع", "الصحة"] },
+  { id: 23, p: 2, title: "التجلي والاستخراج", sub: "رحلة نفسية عميقة لاستخراج قيمك وارتباطها بأسماء الله الحسنى", mins: 20, icon: "🪞", type: "deep_values" },
   { id: 7, p: 3, title: "نقاط قوتك", sub: "حدّد أعلى 5", mins: 30, icon: "💎", type: "via", strengths: ["الفضول", "حب التعلم", "التفكير النقدي", "الإبداع", "الحكمة", "الشجاعة", "المثابرة", "الصدق", "الحيوية", "الحب", "اللطف", "الذكاء الاجتماعي", "روح الفريق", "الإنصاف", "القيادة", "الغفران", "التواضع", "الحكمة العملية", "ضبط النفس", "تقدير الجمال", "الامتنان", "التفاؤل", "الفكاهة", "الروحانية"] },
   { id: 8, p: 3, title: "يوميات التدفق", sub: "سجّل ما يشحن طاقتك", mins: 25, icon: "🌊", type: "flow" },
   { id: 9, p: 3, title: "تقييم PERMA", sub: "قِس ازدهارك", mins: 30, icon: "🌟", type: "mq", qs: ["P — 3 أشياء سارت جيداً ولماذا", "E — متى نسيت الوقت؟", "R — كيف علاقاتك وكيف تعمّقها؟", "M — ما يمنح حياتك معنى؟ اكتب رسالة أولية.", "A — أمنيتك ← نتيجة ← عائق ← خطة"] },
@@ -719,6 +746,144 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   function hSave() { onSave(a); sT("✅ تم حفظ إجاباتك بنجاح"); }
 
   function renderEx() {
+    if (ex.type === "deep_values") {
+      const step = a.dv_step || 0;
+      const iter = a.dv_iteration || 0;
+      const goal = a.dv_goal || "";
+      const temp7 = a.dv_temp || ["", "", "", "", "", "", ""];
+      const vals = a.dv_vals || [];
+      const negs = a.dv_negs || [];
+
+      const setTemp = (i, v) => {
+        const newT = [...temp7];
+        newT[i] = v;
+        up("dv_temp", newT);
+      };
+
+      const isTempValid = () => {
+        const filled = temp7.every(v => v && v.trim() !== "");
+        const unique = new Set(temp7.map(v => v ? v.trim() : "")).size === 7;
+        return filled && unique;
+      };
+
+      if (step === 0) {
+        return (
+          <div className="si">
+            <h3 style={{ color: C.pri, fontSize: 16, fontWeight: 800, marginBottom: 12 }}>ما هو أكبر وأعظم هدف تريد تحقيقه في حياتك؟</h3>
+            <TA value={goal} onChange={v => up("dv_goal", v)} rows={3} placeholder="اكتب هدفك الأعظم هنا..." />
+            <Btn sx={{marginTop: 16}} onClick={() => { up("dv_step", 1); up("dv_temp", Array(7).fill("")); }} dis={!goal.trim()} full>ابدأ الرحلة ←</Btn>
+          </div>
+        );
+      }
+
+      if (step === 1 || step === 3 || step === 5) {
+        let prompt = "";
+        let desc = "";
+        if (step === 1) {
+          prompt = `يا ${user?.name || "صديقي"}، عندما تحقق هذا الهدف، ماذا تكون؟`;
+          desc = "أدخل 7 صفات أو مشاعر مختلفة (يجب تعبئتها جميعاً بدون تكرار)";
+        } else if (step === 3) {
+          prompt = `عكس ${user?.name || "صديقي"} الـ "${vals[iter]}"، ماذا يكون؟`;
+          desc = "أدخل 7 صفات سلبية أو مؤلمة مختلفة تمثل العكس تماماً";
+        } else if (step === 5) {
+          prompt = `عكس ${user?.name || "صديقي"} الـ "${negs[iter]}"، ماذا يكون؟`;
+          desc = "أدخل 7 صفات إيجابية مضادة لهذه الحالة السلبية";
+        }
+
+        return (
+          <div className="si">
+            <h3 style={{ color: C.pri, fontSize: 16, fontWeight: 800, marginBottom: 4 }}>{prompt}</h3>
+            <p style={{ color: C.txL, fontSize: 12, marginBottom: 16 }}>{desc}</p>
+            {temp7.map((v, i) => (
+              <div key={i} style={{marginBottom: 8}}>
+                <Inp value={v} onChange={val => setTemp(i, val)} placeholder={`إجابة ${i+1}`} />
+              </div>
+            ))}
+            {!isTempValid() && temp7.some(v => v) && (
+              <p style={{ color: C.err, fontSize: 12, marginTop: 8 }}>يرجى تعبئة جميع الحقول السبعة بقيم مختلفة وعدم التكرار.</p>
+            )}
+            <Btn sx={{marginTop: 16}} onClick={() => up("dv_step", step + 1)} dis={!isTempValid()} full>التالي ←</Btn>
+          </div>
+        );
+      }
+
+      if (step === 2 || step === 4 || step === 6) {
+        let prompt = "";
+        if (step === 2 || step === 6) {
+          prompt = "استمع لقلبك، واختر أكثر نقطة من هذه السبع أحببتها وأثرت بك 🤍";
+        } else if (step === 4) {
+          prompt = "استمع لقلبك، واختر أكثر نقطة من هذه السبع جعلتك تتألم وأثرت بك 💔";
+        }
+
+        const handlePick = (val) => {
+          if (step === 2) {
+            up("dv_vals", [val]);
+            up("dv_iteration", 0);
+            up("dv_step", 3);
+          } else if (step === 4) {
+            up("dv_negs", [...negs, val]);
+            up("dv_step", 5);
+          } else if (step === 6) {
+            const newVals = [...vals, val];
+            up("dv_vals", newVals);
+            if (newVals.length === 7) {
+              up("dv_step", 7);
+            } else {
+              up("dv_iteration", iter + 1);
+              up("dv_step", 3);
+            }
+          }
+          up("dv_temp", Array(7).fill(""));
+        };
+
+        return (
+          <div className="si">
+            <h3 style={{ color: C.pri, fontSize: 16, fontWeight: 800, marginBottom: 16 }}>{prompt}</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {temp7.map((v, i) => (
+                <button key={i} onClick={() => handlePick(v)} style={{
+                  padding: "14px", background: "rgba(255,255,255,0.8)", border: `1px solid ${C.bdr}`,
+                  borderRadius: 12, fontSize: 15, fontWeight: 700, color: C.pri, cursor: "pointer",
+                  transition: "all 0.2s", textAlign: "right"
+                }}
+                onMouseEnter={e => e.target.style.borderColor = C.gold}
+                onMouseLeave={e => e.target.style.borderColor = C.bdr}>
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      if (step === 7) {
+        return (
+          <div className="si" style={{ textAlign: "center", padding: "10px 0" }}>
+            <h2 style={{ color: C.pri, fontSize: 22, fontWeight: 900, marginBottom: 8 }}>تجلي قيمك العليا ✨</h2>
+            <p style={{ color: C.txM, fontSize: 14, lineHeight: 1.8, marginBottom: 24 }}>
+              هذه هي قيمك الداخلية الخاصة التي تحركك في الحياة، وتتجلى فيها معاني أسماء الله الحسنى لتنير دربك.
+            </p>
+            <div style={{ display: "grid", gap: 12 }}>
+              {vals.map((v, i) => (
+                <div key={i} style={{
+                  background: "linear-gradient(135deg, #ffffff, #f0f7ff)",
+                  border: `1px solid ${C.gold}40`, borderRadius: 16, padding: 16,
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  boxShadow: "0 4px 12px rgba(22,45,80,0.05)"
+                }}>
+                  <div style={{ fontWeight: 800, color: C.pri, fontSize: 15 }}>{v}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: C.txL }}>تتجلى في</span>
+                    <span style={{ background: `${C.gold}15`, color: C.gold, padding: "6px 12px", borderRadius: 8, fontSize: 13, fontWeight: 900 }}>{getAsmaForValue(v)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+    }
+
     if (ex.type === "diag") {
       var cq = ["حياتي لديها إحساس واضح بالرسالة", "لديّ رسالة تعكس هويتي", "أعمل نحو شيء ذي معنى", "حياتي تسترشد بإحساس قوي"];
       var eq = ["أبحث بنشاط عن رسالة", "أبحث عن معنى", "أستكشف اتجاهات مختلفة"];
@@ -1136,6 +1301,26 @@ function ExReadOnly({ ex, answers }) {
           </div>
           <span style={{ fontSize: 11, color: C.txL }}>{mx}</span>
           <span style={{ fontSize: 14, fontWeight: 800, color: C.gold, background: C.gold + "10", borderRadius: 7, width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>{val}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (ex.type === "deep_values") {
+    const vals = a.dv_vals || [];
+    if (vals.length === 0) return <div style={{ color: C.txL, fontSize: 13, fontStyle: "italic", padding: "8px 12px" }}>لم يُكمل الرحلة بعد</div>;
+    return (
+      <div>
+        <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>الهدف الأعظم:</h3>
+        <ROText value={a.dv_goal} />
+        <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginTop: 16, marginBottom: 10 }}>القيم المستخرجة وتجلياتها:</h3>
+        <div style={{ display: "grid", gap: 8 }}>
+          {vals.map((v, i) => (
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, border: `1px solid ${C.bdr}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontWeight: 700, color: C.pri, fontSize: 13 }}>{v}</span>
+              <span style={{ color: C.gold, fontSize: 12, fontWeight: 800, background: `${C.gold}15`, padding: "4px 8px", borderRadius: 6 }}>{getAsmaForValue(v)}</span>
+            </div>
+          ))}
         </div>
       </div>
     );
