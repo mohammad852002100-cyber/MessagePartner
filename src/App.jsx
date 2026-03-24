@@ -1,7 +1,6 @@
 import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
-
 import { useState, useEffect, useRef } from "react";
 
 /* ═══ Supabase Database ═══ */
@@ -67,11 +66,25 @@ const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", 
 const CSS_TEXT = `
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
 body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:rtl;
-  -webkit-overflow-scrolling:touch;overscroll-behavior:none}
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:none;
+  padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+  padding-right:env(safe-area-inset-right);padding-left:env(safe-area-inset-left)}
 textarea,input,select,button{font-family:inherit;font-size:16px}
 input[type=text],input[type=password],textarea,select{font-size:16px!important}
+/* Hide scrollbar everywhere */
+*{scrollbar-width:none;-ms-overflow-style:none}
+*::-webkit-scrollbar{display:none}
+button{-webkit-tap-highlight-color:transparent}
+/* Prevent pull-to-refresh */
+html,body{overscroll-behavior:none}
+/* Smooth image rendering */
+img,svg{max-width:100%;height:auto}
+/* Fix iOS input zoom */
+@supports (-webkit-touch-callout:none){
+  input,textarea,select{font-size:16px!important}
+}
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes sd{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
@@ -85,7 +98,6 @@ input[type=text],input[type=password],textarea,select{font-size:16px!important}
 .sg>*:nth-child(5){animation-delay:200ms}.sg>*:nth-child(6){animation-delay:250ms}
 .sg>*:nth-child(7){animation-delay:300ms}.sg>*:nth-child(8){animation-delay:350ms}
 input[type=range]{accent-color:${C.gold};height:6px}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#c4c0b6;border-radius:99px}
 `;
 
 /* ═══ Data ═══ */
@@ -350,34 +362,20 @@ function Toast({ msg, onClose }) {
   );
 }
 
-/* Floating back button — appears on scroll */
-function FloatingBack({ onClick, label }) {
-  const [show, setShow] = useState(false);
-
-  useEffect(function() {
-    function onScroll() {
-      setShow(window.scrollY > 200);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return function() { window.removeEventListener("scroll", onScroll); };
-  }, []);
-
-  if (!show) return null;
+/* Floating back button — always visible, right side */
+function FloatingBack({ onClick }) {
   return (
     <button onClick={function() { onClick(); window.scrollTo(0, 0); }}
       style={{
-        position: "fixed", bottom: 24, left: 20, zIndex: 900,
-        background: "rgba(255,255,255,.95)", backdropFilter: "blur(10px)",
-        border: "1px solid " + C.bdr, borderRadius: 28,
-        padding: "10px 18px", fontSize: 13, fontWeight: 700,
-        color: C.pri, cursor: "pointer", fontFamily: "'Tajawal',sans-serif",
-        boxShadow: "0 4px 20px rgba(0,0,0,.1)",
-        display: "flex", alignItems: "center", gap: 6,
-        animation: "fu .3s ease both",
-        direction: "rtl"
-      }}>
-      <span style={{ fontSize: 14 }}>→</span> {label || "رجوع"}
-    </button>
+        position: "fixed", bottom: 28, right: 18, zIndex: 900,
+        width: 46, height: 46, borderRadius: "50%",
+        background: "rgba(255,255,255,.92)", backdropFilter: "blur(8px)",
+        border: "1px solid " + C.bdr,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", boxShadow: "0 3px 14px rgba(0,0,0,.1)",
+        color: C.pri, fontSize: 18, fontWeight: 700,
+        WebkitTapHighlightColor: "transparent",
+      }}>→</button>
   );
 }
 
@@ -487,7 +485,7 @@ function LsnV({ lesson, onDone, onBack }) {
           <Btn onClick={onDone} v="gold" sz="lg">أنهيت الدرس ✓</Btn>
         </div>
       </Crd>
-      <FloatingBack onClick={onBack} label="رجوع" />
+      <FloatingBack onClick={onBack} />
     </div>
   );
 }
@@ -781,7 +779,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <Btn onClick={function() { hSave(); onDone(); }} v="gold">أنهيت التمرين ✓</Btn>
         </div>
       </Crd>
-      <FloatingBack onClick={onBack} label="رجوع" />
+      <FloatingBack onClick={onBack} />
     </div>
   );
 }
@@ -832,7 +830,7 @@ function PhV({ phId, user, onL, onE, onBack }) {
           </div>
         );
       })}
-      <FloatingBack onClick={onBack} label="رجوع" />
+      <FloatingBack onClick={onBack} />
     </div>
   );
 }
@@ -1435,18 +1433,33 @@ export default function App() {
 
   /* Fix mobile viewport */
   useEffect(function() {
+    // Set viewport
     var existing = document.querySelector('meta[name="viewport"]');
+    var content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
     if (existing) {
-      existing.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+      existing.setAttribute("content", content);
     } else {
       var meta = document.createElement("meta");
       meta.name = "viewport";
-      meta.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+      meta.content = content;
       document.head.appendChild(meta);
     }
-    /* Prevent double-tap zoom */
+    // Theme color for mobile browser bar
+    var theme = document.querySelector('meta[name="theme-color"]');
+    if (!theme) {
+      theme = document.createElement("meta");
+      theme.name = "theme-color";
+      document.head.appendChild(theme);
+    }
+    theme.content = C.pri;
+    // Mobile-first CSS fixes
     var style = document.createElement("style");
-    style.textContent = "html{touch-action:manipulation}*{-webkit-tap-highlight-color:transparent}";
+    style.textContent = [
+      "html{touch-action:manipulation}",
+      "*{-webkit-tap-highlight-color:transparent}",
+      "body{position:relative;width:100%;overflow-x:hidden}",
+      "input,textarea{border-radius:0;-webkit-appearance:none;appearance:none}",
+    ].join("");
     document.head.appendChild(style);
   }, []);
 
