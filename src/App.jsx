@@ -555,12 +555,12 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ height: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(160deg, #0a1628 0%, #162d50 35%, #234a78 65%, #3b7dd8 100%)", display: "flex", flexDirection: "column", overflow: "hidden", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
+    <div style={{ height: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(150deg, #1e3c72 0%, #2a5298 30%, #4a90d9 60%, #74b9ff 85%, #a8d8ea 100%)", display: "flex", flexDirection: "column", overflow: "hidden", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
       <style>{CSS_TEXT}</style>
 
       {/* Top bar */}
       <div style={{ flexShrink: 0, padding: "10px 20px 0", paddingTop: "calc(10px + env(safe-area-inset-top))", textAlign: "center" }}>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,.4)", letterSpacing: 1.5 }}>شريكك في اكتشاف رسالتك</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,.4)", letterSpacing: 1.5 }}>مرحباً بك</span>
       </div>
 
       {/* Scrollable content area */}
@@ -568,8 +568,8 @@ function Login({ onLogin }) {
 
         {/* Logo */}
         <div className="si" style={{ textAlign: "center", marginBottom: 28, flexShrink: 0 }}>
-          <div style={{ width: 72, height: 72, borderRadius: 20, margin: "0 auto 14px", background: "rgba(255,255,255,.12)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, border: "1px solid rgba(255,255,255,.15)" }}>🧭</div>
-          <h1 style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 6 }}>مرحباً بك</h1>
+          <div style={{ width: 72, height: 72, borderRadius: 20, margin: "0 auto 14px", background: "rgba(255,255,255,.18)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, border: "1px solid rgba(255,255,255,.25)", boxShadow: "0 8px 32px rgba(0,0,0,.1)" }}>🧭</div>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", marginBottom: 6 }}>شريكك في اكتشاف رسالتك</h1>
           <p style={{ color: "rgba(255,255,255,.5)", fontSize: 13 }}>سجّل دخولك لتبدأ رحلتك</p>
         </div>
 
@@ -603,24 +603,24 @@ function Login({ onLogin }) {
             <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>اسم المستخدم</label>
             <input type="text" value={un || ""} onChange={function(e) { sUn(e.target.value); }} placeholder="اكتب اسم المستخدم..."
               style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
-              onFocus={function(e) { e.target.style.borderColor = "rgba(192,122,62,.6)"; }}
+              onFocus={function(e) { e.target.style.borderColor = "rgba(74,144,217,.6)"; }}
               onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
           </div>
           <div style={{ marginBottom: 18 }}>
             <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>كلمة المرور</label>
             <input type="password" value={pw || ""} onChange={function(e) { sPw(e.target.value); }} placeholder="اكتب كلمة المرور..."
               style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
-              onFocus={function(e) { e.target.style.borderColor = "rgba(192,122,62,.6)"; }}
+              onFocus={function(e) { e.target.style.borderColor = "rgba(74,144,217,.6)"; }}
               onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
           </div>
           {err && <div style={{ background: "rgba(217,68,68,.15)", color: "#ff8080", borderRadius: 12, padding: "10px 14px", fontSize: 13, marginBottom: 12, fontWeight: 600, border: "1px solid rgba(217,68,68,.2)" }}>{err}</div>}
           <button onClick={function() { doLogin(un, pw); }} disabled={ld}
             style={{
               width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
-              background: "linear-gradient(135deg, #c07a3e, #d49358)", color: "#fff",
+              background: "linear-gradient(135deg, #2a5298, #4a90d9)", color: "#fff",
               fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
               fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.6 : 1,
-              boxShadow: "0 4px 20px rgba(192,122,62,.3)",
+              boxShadow: "0 4px 20px rgba(42,82,152,.4)",
               transition: "all .15s"
             }}>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك"}</button>
         </div>
@@ -663,6 +663,7 @@ function LsnV({ lesson, onDone, onBack }) {
 /* ═══ Exercise View ═══ */
 function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   const [a, sA2] = useState(saved || {});
+  const aRef = useRef(saved || {});
   const [toast, sT] = useState("");
   const tm = useRef(null);
   const [aiSt, sAiSt] = useState(saved && saved.ai_result ? "done" : "idle");
@@ -679,13 +680,14 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   }, [ex.type, user]);
 
   function up(k, v) {
-    var n = Object.assign({}, a, { [k]: v });
+    var n = Object.assign({}, aRef.current, { [k]: v });
+    aRef.current = n;
     sA2(n);
     clearTimeout(tm.current);
-    tm.current = setTimeout(function() { onSave(n); }, 800);
+    tm.current = setTimeout(function() { onSave(aRef.current); }, 800);
   }
 
-  function hSave() { onSave(a); sT("✅ تم حفظ إجاباتك بنجاح"); }
+  function hSave() { onSave(aRef.current); sT("✅ تم حفظ إجاباتك بنجاح"); }
 
   function renderEx() {
     if (ex.type === "diag") {
@@ -845,7 +847,8 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           sAiRes(result);
           sAiSt("done");
           // Save result
-          var n = Object.assign({}, a, { ai_result: result });
+          var n = Object.assign({}, aRef.current, { ai_result: result });
+          aRef.current = n;
           sA2(n);
           onSave(n);
         }).catch(function() { sAiSt("error"); });
@@ -1622,7 +1625,7 @@ export default function App() {
       theme.name = "theme-color";
       document.head.appendChild(theme);
     }
-    theme.content = "#0a1628";
+    theme.content = "#1e3c72";
     // Mobile-first CSS fixes
     var style = document.createElement("style");
     style.textContent = [
@@ -1637,28 +1640,29 @@ export default function App() {
   /* Update theme-color when auth changes */
   useEffect(function() {
     var theme = document.querySelector('meta[name="theme-color"]');
-    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#0a1628";
+    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#1e3c72";
   }, [auth]);
 
   useEffect(function() {
-    // 1. Try restore session
     gSession().then(function(session) {
       if (session && session.username) {
-        // Refresh user data from Supabase
+        // Use session immediately — no waiting for network
+        sAuth(session);
+        sLd(false);
+        // Refresh from Supabase in background
         gU().then(function(u) {
-          var fresh = u[session.username];
-          if (fresh) {
-            sAuth(Object.assign({ username: session.username }, fresh));
+          if (u[session.username]) {
+            var fresh = Object.assign({ username: session.username }, u[session.username]);
+            sAuth(fresh);
+            sSession(fresh);
           }
-          // Ensure default users exist (background)
+          // Ensure default users
           var changed = false;
           if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
           if (!u["m7md.abu.sneneh"]) { u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
           if (changed) sU(u);
-          sLd(false);
         });
       } else {
-        // No session — ensure users exist then show login
         gU().then(function(u) {
           var changed = false;
           if (!u.admin) { u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() }; changed = true; }
@@ -1681,8 +1685,9 @@ export default function App() {
       var upd = Object.assign({}, u[auth.username], ch, { lastActive: Date.now() });
       u[auth.username] = upd;
       sU(u).then(function(ok) {
-        if (ok) { console.log("✅ User updated:", auth.username); }
-        sAuth(function(p) { return Object.assign({}, p, upd); });
+        var newAuth = Object.assign({}, auth, upd);
+        sAuth(newAuth);
+        sSession(newAuth);
       });
     });
   }
@@ -1721,7 +1726,7 @@ export default function App() {
 
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
-  if (ld) return (<div style={{ minHeight: "100vh", background: "#162d50" }}><style>{CSS_TEXT}</style></div>);
+  if (ld) return (<div style={{ minHeight: "100vh", background: "#1e3c72" }}><style>{CSS_TEXT}</style></div>);
 
   if (!auth) return (<Login onLogin={function(u) { sSession(u); sAuth(u); sV("dash"); }} />);
   if (auth.isAdmin) return (<Admin onLogout={doLogout} />);
