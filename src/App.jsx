@@ -1,6 +1,7 @@
 import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
+
 import { useState, useEffect, useRef } from "react";
 
 /* ═══ Supabase Database ═══ */
@@ -11,6 +12,7 @@ const SB_H = { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY, "Content-T
 async function sbGet(table, key) {
   try {
     var res = await fetch(SB_URL + "/rest/v1/" + table + "?key=eq." + encodeURIComponent(key) + "&select=value", { headers: SB_H });
+    if (!res.ok) { console.error("sbGet failed:", res.status, await res.text()); return null; }
     var data = await res.json();
     return (data && data[0]) ? data[0].value : null;
   } catch (e) { console.error("sbGet error:", e); return null; }
@@ -18,20 +20,22 @@ async function sbGet(table, key) {
 
 async function sbSet(table, key, value) {
   try {
-    await fetch(SB_URL + "/rest/v1/" + table, {
+    var res = await fetch(SB_URL + "/rest/v1/" + table, {
       method: "POST",
-      headers: Object.assign({}, SB_H, { "Prefer": "resolution=merge-duplicates" }),
+      headers: Object.assign({}, SB_H, { "Prefer": "resolution=merge-duplicates,return=minimal" }),
       body: JSON.stringify({ key: key, value: value })
     });
+    if (!res.ok) { console.error("sbSet failed:", res.status, await res.text()); return false; }
     return true;
   } catch (e) { console.error("sbSet error:", e); return false; }
 }
 
 async function sbDel(table, key) {
   try {
-    await fetch(SB_URL + "/rest/v1/" + table + "?key=eq." + encodeURIComponent(key), {
+    var res = await fetch(SB_URL + "/rest/v1/" + table + "?key=eq." + encodeURIComponent(key), {
       method: "DELETE", headers: SB_H
     });
+    if (!res.ok) { console.error("sbDel failed:", res.status); }
     return true;
   } catch (e) { console.error("sbDel error:", e); return false; }
 }
@@ -41,13 +45,13 @@ var sU = async function(u) { return sbSet("r_users", "all_users", u); };
 var gA = async function(u) { return (await sbGet("r_answers", u)) || {}; };
 var sA = async function(u, a) { return sbSet("r_answers", u, a); };
 
-/* Saved accounts — device-local only (استخدام localStorage للمتصفح) */
+/* Saved accounts — device-local only */
 var gSaved = async function() {
-  try { var r = localStorage.getItem("r_saved"); return r ? JSON.parse(r) : []; }
+  try { var r = await window.storage.get("r_saved", false); return r ? JSON.parse(r.value) : []; }
   catch (e) { return []; }
 };
 var sSaved = async function(a) {
-  try { localStorage.setItem("r_saved", JSON.stringify(a)); return true; }
+  try { await window.storage.set("r_saved", JSON.stringify(a), false); return true; }
   catch (e) { return false; }
 };
 
@@ -63,8 +67,11 @@ const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", 
 const CSS_TEXT = `
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:rtl}
-textarea,input,select,button{font-family:inherit}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:rtl;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:none}
+textarea,input,select,button{font-family:inherit;font-size:16px}
+input[type=text],input[type=password],textarea,select{font-size:16px!important}
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes sd{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
@@ -343,6 +350,37 @@ function Toast({ msg, onClose }) {
   );
 }
 
+/* Floating back button — appears on scroll */
+function FloatingBack({ onClick, label }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(function() {
+    function onScroll() {
+      setShow(window.scrollY > 200);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return function() { window.removeEventListener("scroll", onScroll); };
+  }, []);
+
+  if (!show) return null;
+  return (
+    <button onClick={function() { onClick(); window.scrollTo(0, 0); }}
+      style={{
+        position: "fixed", bottom: 24, left: 20, zIndex: 900,
+        background: "rgba(255,255,255,.95)", backdropFilter: "blur(10px)",
+        border: "1px solid " + C.bdr, borderRadius: 28,
+        padding: "10px 18px", fontSize: 13, fontWeight: 700,
+        color: C.pri, cursor: "pointer", fontFamily: "'Tajawal',sans-serif",
+        boxShadow: "0 4px 20px rgba(0,0,0,.1)",
+        display: "flex", alignItems: "center", gap: 6,
+        animation: "fu .3s ease both",
+        direction: "rtl"
+      }}>
+      <span style={{ fontSize: 14 }}>→</span> {label || "رجوع"}
+    </button>
+  );
+}
+
 /* ═══ Login ═══ */
 function Login({ onLogin }) {
   const [un, sUn] = useState("");
@@ -449,6 +487,7 @@ function LsnV({ lesson, onDone, onBack }) {
           <Btn onClick={onDone} v="gold" sz="lg">أنهيت الدرس ✓</Btn>
         </div>
       </Crd>
+      <FloatingBack onClick={onBack} label="رجوع" />
     </div>
   );
 }
@@ -742,6 +781,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <Btn onClick={function() { hSave(); onDone(); }} v="gold">أنهيت التمرين ✓</Btn>
         </div>
       </Crd>
+      <FloatingBack onClick={onBack} label="رجوع" />
     </div>
   );
 }
@@ -792,6 +832,7 @@ function PhV({ phId, user, onL, onE, onBack }) {
           </div>
         );
       })}
+      <FloatingBack onClick={onBack} label="رجوع" />
     </div>
   );
 }
@@ -1392,37 +1433,43 @@ export default function App() {
   const [exO, sExO] = useState(null);
   const [exS, sExS] = useState({});
 
+  /* Fix mobile viewport */
+  useEffect(function() {
+    var existing = document.querySelector('meta[name="viewport"]');
+    if (existing) {
+      existing.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+    } else {
+      var meta = document.createElement("meta");
+      meta.name = "viewport";
+      meta.content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+      document.head.appendChild(meta);
+    }
+    /* Prevent double-tap zoom */
+    var style = document.createElement("style");
+    style.textContent = "html{touch-action:manipulation}*{-webkit-tap-highlight-color:transparent}";
+    document.head.appendChild(style);
+  }, []);
+
   useEffect(function() {
     gU().then(function(u) {
-      // One-time cleanup: keep only admin and m7md.abu.sneneh
-      sbGet("r_users", "cleaned_v2").then(function(cleaned) {
-        if (!cleaned) {
-          var keep = {};
-          // Delete answers for removed users
-          Object.keys(u).forEach(function(key) {
-            if (key !== "admin" && key !== "m7md.abu.sneneh") {
-              sbDel("r_answers", key);
-            }
-          });
-          // Rebuild users with only admin and m7md.abu.sneneh
-          if (u.admin) keep.admin = u.admin;
-          if (u["m7md.abu.sneneh"]) keep["m7md.abu.sneneh"] = u["m7md.abu.sneneh"];
-          u = keep;
-          sbSet("r_users", "cleaned_v2", true);
-        }
-
-        var changed = false;
-        if (!u.admin) {
-          u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
-          changed = true;
-        }
-        if (!u["m7md.abu.sneneh"]) {
-          u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
-          changed = true;
-        }
-        if (changed || !cleaned) { sU(u).then(function() { sLd(false); }); }
-        else { sLd(false); }
-      });
+      var changed = false;
+      if (!u.admin) {
+        u.admin = { password: "admin1234", name: "المشرف", age: 0, gender: "other", lifeStage: "mid", isAdmin: true, completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
+        changed = true;
+      }
+      if (!u["m7md.abu.sneneh"]) {
+        u["m7md.abu.sneneh"] = { password: "Allah19@", name: "M7md Abu Sneneh", age: 23, gender: "male", lifeStage: "young", completedLessons: [], completedExercises: [], createdAt: Date.now(), lastActive: Date.now() };
+        changed = true;
+      }
+      if (changed) {
+        sU(u).then(function() {
+          console.log("✅ Users initialized in Supabase");
+          sLd(false);
+        });
+      } else {
+        console.log("✅ Users loaded from Supabase:", Object.keys(u).length, "users");
+        sLd(false);
+      }
     });
   }, []);
 
@@ -1430,7 +1477,10 @@ export default function App() {
     gU().then(function(u) {
       var upd = Object.assign({}, u[auth.username], ch, { lastActive: Date.now() });
       u[auth.username] = upd;
-      sU(u).then(function() { sAuth(function(p) { return Object.assign({}, p, upd); }); });
+      sU(u).then(function(ok) {
+        if (ok) { console.log("✅ User updated:", auth.username); }
+        sAuth(function(p) { return Object.assign({}, p, upd); });
+      });
     });
   }
 
@@ -1443,7 +1493,10 @@ export default function App() {
   function saveE(exItem, ans2) {
     gA(auth.username).then(function(c) {
       var updated = Object.assign({}, c, { [exItem.id]: ans2 });
-      sA(auth.username, updated);
+      sA(auth.username, updated).then(function(ok) {
+        if (ok) { console.log("✅ Answers saved for", auth.username, "exercise", exItem.id); }
+        else { console.error("❌ Failed to save answers"); }
+      });
       sExS(ans2);
     });
   }
@@ -1463,7 +1516,7 @@ export default function App() {
     });
   }
 
-  function nav(v, d) { sV(v); sVd(d); }
+  function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
   if (ld) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl" }}>
