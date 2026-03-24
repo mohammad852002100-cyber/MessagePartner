@@ -67,12 +67,12 @@ var clearSession = async function() {
   try { await window.storage.set("r_session", JSON.stringify(null), false); } catch (e) {}
 };
 
-/* ═══ Colors — Rococo ═══ */
+/* ═══ Colors — Confident & Vibrant ═══ */
 const C = {
-  pri: "#3d2b1f", priL: "#5c4033", gold: "#b8860b", goldL: "#d4a437", goldBg: "#fdf6e3",
-  bg: "#faf5ef", card: "#fffdf9", tx: "#3d2b1f", txM: "#7a6555", txL: "#b0a090", bdr: "#e8ddd0",
-  ok: "#6b8e6b", okBg: "#f0f5ef", err: "#c25050", errBg: "#fdf0ef",
-  ph: ["#7b6ea0", "#6b8e6b", "#c08b5c", "#8b6ea0", "#c27878", "#a08b50", "#5c8b8b", "#9b6ea0"],
+  pri: "#162d50", priL: "#234a78", gold: "#c07a3e", goldL: "#d49358", goldBg: "#fdf5ee",
+  bg: "#f2f4f7", card: "#ffffff", tx: "#162d50", txM: "#4a5e78", txL: "#8a96a8", bdr: "#dce1e8",
+  ok: "#0d9465", okBg: "#edfaf3", err: "#d94444", errBg: "#fef2f2",
+  ph: ["#2563eb", "#0d9465", "#e07832", "#7c3aed", "#e03e6a", "#c07a3e", "#0891b2", "#9333ea"],
 };
 const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", senior: "55+" };
 
@@ -134,16 +134,16 @@ div[style*="cursor: pointer"]:active{transform:scale(0.98)!important;opacity:0.9
 .sg>*:nth-child(7){animation-delay:240ms}.sg>*:nth-child(8){animation-delay:280ms}
 /* Custom range slider */
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;
-  background:#e8ddd0;border-radius:99px;outline:none}
+  background:#dce1e8;border-radius:99px;outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-  width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid #fffdf9;
-  background:linear-gradient(135deg,#b8860b,#d4a437);
-  box-shadow:0 2px 8px rgba(184,134,11,.25)}
+  width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid #fff;
+  background:linear-gradient(135deg,#c07a3e,#d49358);
+  box-shadow:0 2px 8px rgba(192,122,62,.3)}
 input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;cursor:pointer;
-  border:3px solid #fffdf9;background:linear-gradient(135deg,#b8860b,#d4a437);
-  box-shadow:0 2px 8px rgba(184,134,11,.25)}
-input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:#e8ddd0}
-input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:#e8ddd0}
+  border:3px solid #fff;background:linear-gradient(135deg,#c07a3e,#d49358);
+  box-shadow:0 2px 8px rgba(192,122,62,.3)}
+input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:99px;background:#dce1e8}
+input[type=range]::-moz-range-track{height:5px;border-radius:99px;background:#dce1e8}
 `;
 
 /* ═══ Data ═══ */
@@ -555,73 +555,80 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(180deg, #faf5ef 0%, #f3ebe0 50%, #ede3d5 100%)", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(160deg, #0a1628 0%, #162d50 35%, #234a78 65%, #3b7dd8 100%)", display: "flex", flexDirection: "column", overflow: "hidden", position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
       <style>{CSS_TEXT}</style>
 
-      {/* App status bar */}
-      <div style={{ padding: "14px 20px 0", paddingTop: "calc(14px + env(safe-area-inset-top))" }}>
-        <div style={{ textAlign: "center", fontSize: 11, fontWeight: 600, color: "#b8a080", letterSpacing: 1.5 }}>شريكك في اكتشاف رسالتك</div>
+      {/* Top bar */}
+      <div style={{ flexShrink: 0, padding: "10px 20px 0", paddingTop: "calc(10px + env(safe-area-inset-top))", textAlign: "center" }}>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,.4)", letterSpacing: 1.5 }}>شريكك في اكتشاف رسالتك</span>
       </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "20px 28px", maxWidth: 440, width: "100%", margin: "0 auto" }}>
+      {/* Scrollable content area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 24px", maxWidth: 420, width: "100%", margin: "0 auto", overflow: "auto" }}>
 
         {/* Logo */}
-        <div className="si" style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ width: 80, height: 80, borderRadius: 24, margin: "0 auto 18px", background: "linear-gradient(145deg, #f3ebe0, #b8860b)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, boxShadow: "0 8px 30px rgba(184,134,11,.15), inset 0 1px 0 rgba(255,255,255,.6)", border: "2px solid rgba(184,134,11,.15)" }}>🧭</div>
-          <h1 style={{ fontSize: 25, fontWeight: 900, color: "#3d2b1f", marginBottom: 8, letterSpacing: "-.3px" }}>مرحباً بك</h1>
-          <p style={{ color: "#b0a090", fontSize: 14, lineHeight: 1.7 }}>سجّل دخولك لتكمل رحلة اكتشاف ذاتك</p>
+        <div className="si" style={{ textAlign: "center", marginBottom: 28, flexShrink: 0 }}>
+          <div style={{ width: 72, height: 72, borderRadius: 20, margin: "0 auto 14px", background: "rgba(255,255,255,.12)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 34, border: "1px solid rgba(255,255,255,.15)" }}>🧭</div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 6 }}>مرحباً بك</h1>
+          <p style={{ color: "rgba(255,255,255,.5)", fontSize: 13 }}>سجّل دخولك لتبدأ رحلتك</p>
         </div>
 
         <PWABanner pwa={pwa} />
 
         {/* Saved accounts */}
         {saved.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: "#b0a090", marginBottom: 8, letterSpacing: 1 }}>حساباتك المحفوظة</div>
+          <div style={{ marginBottom: 20, flexShrink: 0 }}>
             {saved.map(function(a) {
               return (
-                <div key={a.u} onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 16, marginBottom: 6, background: "#fffdf9", border: "1px solid #e8ddd0", cursor: "pointer", boxShadow: "0 2px 8px rgba(61,43,31,.04)", transition: "all .15s" }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 13, background: "linear-gradient(135deg, #b8860b, #d4a437)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 16 }}>{a.n ? a.n[0] : "?"}</div>
+                <div key={a.u} onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, marginBottom: 6, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.1)", cursor: "pointer", backdropFilter: "blur(8px)" }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 11, background: "linear-gradient(135deg, #c07a3e, #d49358)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 15 }}>{a.n ? a.n[0] : "?"}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, color: "#3d2b1f" }}>{a.n}</div>
-                    <div style={{ fontSize: 12, color: "#b0a090" }}>@{a.u}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "#fff" }}>{a.n}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>@{a.u}</div>
                   </div>
-                  <button onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#d0c4b4", padding: 4 }}>✕</button>
+                  <button onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: "rgba(255,255,255,.3)", padding: 4 }}>✕</button>
                 </div>
               );
             })}
-            <div style={{ textAlign: "center", margin: "14px 0 0" }}>
-              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, #e0d5c8, transparent)", margin: "0 30px 14px" }} />
-              <span style={{ fontSize: 12, color: "#b8a080" }}>أو سجّل بحساب آخر</span>
+            <div style={{ textAlign: "center", margin: "12px 0 0" }}>
+              <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent)", margin: "0 20px 10px" }} />
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,.35)" }}>أو سجّل بحساب آخر</span>
             </div>
           </div>
         )}
 
         {/* Form */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: 13, color: "#7a6555" }}>اسم المستخدم</label>
-          <Inp value={un} onChange={sUn} placeholder="اكتب اسم المستخدم..." icon="👤" sx={{ background: "#fffdf9", border: "1.5px solid #e8ddd0", borderRadius: 14, padding: "13px 40px 13px 16px" }} />
+        <div style={{ flexShrink: 0 }}>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>اسم المستخدم</label>
+            <input type="text" value={un || ""} onChange={function(e) { sUn(e.target.value); }} placeholder="اكتب اسم المستخدم..."
+              style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
+              onFocus={function(e) { e.target.style.borderColor = "rgba(192,122,62,.6)"; }}
+              onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
+          </div>
+          <div style={{ marginBottom: 18 }}>
+            <label style={{ display: "block", fontWeight: 600, marginBottom: 5, fontSize: 12, color: "rgba(255,255,255,.55)" }}>كلمة المرور</label>
+            <input type="password" value={pw || ""} onChange={function(e) { sPw(e.target.value); }} placeholder="اكتب كلمة المرور..."
+              style={{ width: "100%", border: "1.5px solid rgba(255,255,255,.15)", borderRadius: 12, padding: "12px 14px", fontSize: 15, direction: "rtl", background: "rgba(255,255,255,.08)", color: "#fff", WebkitTextFillColor: "#fff", outline: "none" }}
+              onFocus={function(e) { e.target.style.borderColor = "rgba(192,122,62,.6)"; }}
+              onBlur={function(e) { e.target.style.borderColor = "rgba(255,255,255,.15)"; }} />
+          </div>
+          {err && <div style={{ background: "rgba(217,68,68,.15)", color: "#ff8080", borderRadius: 12, padding: "10px 14px", fontSize: 13, marginBottom: 12, fontWeight: 600, border: "1px solid rgba(217,68,68,.2)" }}>{err}</div>}
+          <button onClick={function() { doLogin(un, pw); }} disabled={ld}
+            style={{
+              width: "100%", padding: "14px 0", borderRadius: 14, border: "none",
+              background: "linear-gradient(135deg, #c07a3e, #d49358)", color: "#fff",
+              fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
+              fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.6 : 1,
+              boxShadow: "0 4px 20px rgba(192,122,62,.3)",
+              transition: "all .15s"
+            }}>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك"}</button>
         </div>
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: 13, color: "#7a6555" }}>كلمة المرور</label>
-          <Inp value={pw} onChange={sPw} placeholder="اكتب كلمة المرور..." type="password" icon="🔒" sx={{ background: "#fffdf9", border: "1.5px solid #e8ddd0", borderRadius: 14, padding: "13px 40px 13px 16px" }} />
-        </div>
-        {err && <div style={{ background: "#fdf0ef", color: "#c25050", borderRadius: 14, padding: "11px 14px", fontSize: 13, marginBottom: 14, fontWeight: 600, border: "1px solid #f0d8d4" }}>{err}</div>}
-        <button onClick={function() { doLogin(un, pw); }} disabled={ld}
-          style={{
-            width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
-            background: "linear-gradient(135deg, #b8860b, #a07008)", color: "#fffdf9",
-            fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
-            fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.6 : 1,
-            boxShadow: "0 4px 16px rgba(184,134,11,.2)",
-            transition: "all .15s", letterSpacing: ".3px"
-          }}>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك"}</button>
       </div>
 
-      {/* Bottom branding */}
-      <div style={{ padding: "16px 20px", paddingBottom: "calc(16px + env(safe-area-inset-bottom))", textAlign: "center" }}>
-        <p style={{ fontSize: 11, color: "#d0c4b4" }}>رحلة اكتشاف الذات تبدأ من هنا 🧭</p>
+      {/* Bottom */}
+      <div style={{ flexShrink: 0, padding: "12px 20px", paddingBottom: "calc(12px + env(safe-area-inset-bottom))", textAlign: "center" }}>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,.25)" }}>رحلة اكتشاف الذات تبدأ من هنا</p>
       </div>
     </div>
   );
@@ -700,14 +707,14 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>مدى قوة التزامك (1=لا أوافق، 7=أوافق تماماً)</h3>
           {cq.map(function(q, i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
               <SL value={a["c" + i]} onChange={function(v) { up("c" + i, v); }} />
             </div>
           ); })}
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginTop: 16, marginBottom: 10 }}>مدى نشاط استكشافك</h3>
           {eq.map(function(q, i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
               <SL value={a["e" + i]} onChange={function(v) { up("e" + i, v); }} />
             </div>
@@ -727,7 +734,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 4 }}>قيّم هذه القيم (1=ليست مهمة، 10=مهمة جداً)</h3>
           <p style={{ fontSize: 12, color: C.txL, marginBottom: 12 }}>اقرأ شرح كل قيمة بعناية ثم قيّمها</p>
           {VD.map(function(vd, i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 3px", fontSize: 14, fontWeight: 700, color: C.pri }}>{vd.n}</p>
               <p style={{ margin: "0 0 8px", fontSize: 12, color: C.txM, lineHeight: 1.7 }}>{vd.d}</p>
               <SL value={a["v" + i]} onChange={function(v) { up("v" + i, v); }} min={1} max={10} />
@@ -749,7 +756,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>قيّم كل مجال</h3>
           {ex.domains.map(function(d, i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700 }}>{d}</p>
               <SL value={a["imp" + i]} onChange={function(v) { up("imp" + i, v); }} min={1} max={10} label="الأهمية لي" />
               <SL value={a["con" + i]} onChange={function(v) { up("con" + i, v); }} min={1} max={10} label="اتساق سلوكي" />
@@ -768,7 +775,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>قيّم نقاط القوة (1-5)</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 12 }}>
             {ex.strengths.map(function(s, i) { return (
-              <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
+              <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 5 }}>{s}</div>
                 <div style={{ display: "flex", gap: 4 }}>
                   {[1, 2, 3, 4, 5].map(function(n) { return (
@@ -795,7 +802,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>سجّل 5 أنشطة</h3>
           {[0, 1, 2, 3, 4].map(function(i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <Inp value={a["fa" + i] || ""} onChange={function(v) { up("fa" + i, v); }} placeholder={"النشاط " + (i + 1)} sx={{ marginBottom: 6 }} />
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 110 }}><SL value={a["fe" + i]} onChange={function(v) { up("fe" + i, v); }} min={1} max={5} label="الاندماج" /></div>
@@ -855,11 +862,11 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
 
           {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-            <div style={{ background: "#f8f3ec", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
+            <div style={{ background: "#f5f7fa", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: C.gold }}>{answeredCount}</div>
               <div style={{ fontSize: 11, color: C.txL }}>تمرين مُجاب</div>
             </div>
-            <div style={{ background: "#f8f3ec", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
+            <div style={{ background: "#f5f7fa", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: C.pri }}>{totalFields}</div>
               <div style={{ fontSize: 11, color: C.txL }}>إجابة إجمالية</div>
             </div>
@@ -1017,8 +1024,8 @@ function Dash({ user, onNav }) {
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "18px 14px 50px" }}>
-      <div className="fu" style={{ background: "linear-gradient(135deg, #3d2b1f 0%, #5c4033 50%, #b8860b 100%)", borderRadius: 20, padding: "26px 22px 22px", color: "#fffdf9", marginBottom: 14, position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", width: 150, height: 150, borderRadius: "50%", background: "rgba(184,134,11,.1)", top: -40, left: -20 }} />
+      <div className="fu" style={{ background: "linear-gradient(135deg, #0a1628 0%, #162d50 50%, #3b7dd8 100%)", borderRadius: 20, padding: "26px 22px 22px", color: "#fff", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", width: 150, height: 150, borderRadius: "50%", background: "rgba(59,125,216,.12)", top: -40, left: -20 }} />
         <div style={{ position: "relative" }}>
           <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 3 }}>مرحباً 👋</div>
           <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 1 }}>{user.name}</h2>
@@ -1082,7 +1089,7 @@ function ExReadOnly({ ex, answers }) {
 
   function ROText({ value }) {
     if (!value) return <div style={{ color: C.txL, fontSize: 13, fontStyle: "italic", padding: "8px 12px" }}>لم يُجب بعد</div>;
-    return <div style={{ fontSize: 14, lineHeight: 2, background: "#f8f3ec", borderRadius: 10, padding: "10px 14px", border: "1px solid " + C.bdr, whiteSpace: "pre-line", color: C.tx }}>{value}</div>;
+    return <div style={{ fontSize: 14, lineHeight: 2, background: "#f5f7fa", borderRadius: 10, padding: "10px 14px", border: "1px solid " + C.bdr, whiteSpace: "pre-line", color: C.tx }}>{value}</div>;
   }
 
   function ROSlider({ value, min, max, label }) {
@@ -1122,14 +1129,14 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>مدى قوة الالتزام</h3>
         {cq.map(function(q, i) { return (
-          <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
             <ROSlider value={a["c" + i]} />
           </div>
         ); })}
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginTop: 16, marginBottom: 10 }}>مدى نشاط الاستكشاف</h3>
         {eq.map(function(q, i) { return (
-          <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
             <ROSlider value={a["e" + i]} />
           </div>
@@ -1148,7 +1155,7 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 12 }}>تقييم القيم</h3>
         {VD.map(function(vd, i) { return (
-          <div key={i} style={{ background: "#f8f3ec", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#f5f7fa", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 3px", fontSize: 14, fontWeight: 700, color: C.pri }}>{vd.n}</p>
             <p style={{ margin: "0 0 8px", fontSize: 12, color: C.txM, lineHeight: 1.7 }}>{vd.d}</p>
             <ROSlider value={a["v" + i]} min={1} max={10} />
@@ -1171,7 +1178,7 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>تقييم المجالات</h3>
         {(ex.domains || []).map(function(d, i) { return (
-          <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700 }}>{d}</p>
             <ROSlider value={a["imp" + i]} min={1} max={10} label="الأهمية" />
             <ROSlider value={a["con" + i]} min={1} max={10} label="الاتساق" />
@@ -1196,7 +1203,7 @@ function ExReadOnly({ ex, answers }) {
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>تقييم نقاط القوة</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 12 }}>
           {(ex.strengths || []).map(function(s, i) { return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 5 }}>{s}</div>
               <div style={{ display: "flex", gap: 4 }}>
                 {[1, 2, 3, 4, 5].map(function(n) { return (
@@ -1225,7 +1232,7 @@ function ExReadOnly({ ex, answers }) {
         {[0, 1, 2, 3, 4].map(function(i) {
           if (!a["fa" + i]) return null;
           return (
-            <div key={i} style={{ background: "#f8f3ec", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#f5f7fa", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: C.pri, marginBottom: 6 }}>{a["fa" + i]}</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 110 }}><ROSlider value={a["fe" + i]} min={1} max={5} label="الاندماج" /></div>
@@ -1383,7 +1390,7 @@ function Admin({ onLogout }) {
                   );
                 })}
                 <div style={{ marginBottom: 7 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>الجنس</label><select value={form.gender} onChange={function(e) { sForm(Object.assign({}, form, { gender: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#fff", color: C.tx }}><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
-                <div style={{ marginBottom: 10 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>المرحلة</label><select value={form.lifeStage} onChange={function(e) { sForm(Object.assign({}, form, { lifeStage: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#f8f3ec" }}>{Object.entries(ST).map(function(e) { return <option key={e[0]} value={e[0]}>{e[1]}</option>; })}</select></div>
+                <div style={{ marginBottom: 10 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>المرحلة</label><select value={form.lifeStage} onChange={function(e) { sForm(Object.assign({}, form, { lifeStage: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#f5f7fa" }}>{Object.entries(ST).map(function(e) { return <option key={e[0]} value={e[0]}>{e[1]}</option>; })}</select></div>
                 {error && <p style={{ color: C.err, fontSize: 11, marginBottom: 6 }}>{error}</p>}
                 <Btn onClick={addUser} v="gold" sz="sm" full>حفظ</Btn>
               </Crd>
@@ -1529,11 +1536,11 @@ function Admin({ onLogout }) {
                           <Crd sx={{ padding: 16 }}>
                             <div style={{ fontSize: 12, color: C.txM, fontWeight: 700, marginBottom: 8 }}>📋 ملخص البيانات المتوفرة:</div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                              <div style={{ background: "#f8f3ec", borderRadius: 8, padding: 10, textAlign: "center" }}>
+                              <div style={{ background: "#f5f7fa", borderRadius: 8, padding: 10, textAlign: "center" }}>
                                 <div style={{ fontSize: 20, fontWeight: 900, color: C.gold }}>{aExs.length}</div>
                                 <div style={{ fontSize: 11, color: C.txL }}>تمرين مُجاب</div>
                               </div>
-                              <div style={{ background: "#f8f3ec", borderRadius: 8, padding: 10, textAlign: "center" }}>
+                              <div style={{ background: "#f5f7fa", borderRadius: 8, padding: 10, textAlign: "center" }}>
                                 <div style={{ fontSize: 20, fontWeight: 900, color: C.pri }}>{Object.values(ans).reduce(function(s, v) { return s + Object.keys(v || {}).length; }, 0)}</div>
                                 <div style={{ fontSize: 11, color: C.txL }}>إجابة إجمالية</div>
                               </div>
@@ -1615,7 +1622,7 @@ export default function App() {
       theme.name = "theme-color";
       document.head.appendChild(theme);
     }
-    theme.content = "#faf5ef";
+    theme.content = "#0a1628";
     // Mobile-first CSS fixes
     var style = document.createElement("style");
     style.textContent = [
@@ -1630,7 +1637,7 @@ export default function App() {
   /* Update theme-color when auth changes */
   useEffect(function() {
     var theme = document.querySelector('meta[name="theme-color"]');
-    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : "#faf5ef") : "#faf5ef";
+    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#0a1628";
   }, [auth]);
 
   useEffect(function() {
@@ -1714,7 +1721,7 @@ export default function App() {
 
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
-  if (ld) return (<div style={{ minHeight: "100vh", background: "#faf5ef" }}><style>{CSS_TEXT}</style></div>);
+  if (ld) return (<div style={{ minHeight: "100vh", background: "#162d50" }}><style>{CSS_TEXT}</style></div>);
 
   if (!auth) return (<Login onLogin={function(u) { sSession(u); sAuth(u); sV("dash"); }} />);
   if (auth.isAdmin) return (<Admin onLogout={doLogout} />);
@@ -1729,8 +1736,8 @@ export default function App() {
       {isInner && (
         <div style={{
           position: "sticky", top: 0, zIndex: 100,
-          background: "rgba(250,245,239,.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-          borderBottom: "0.5px solid rgba(61,43,31,.08)",
+          background: "rgba(242,244,247,.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+          borderBottom: "0.5px solid rgba(22,45,80,.08)",
           padding: "0 16px", height: 48,
           display: "flex", alignItems: "center", justifyContent: "space-between"
         }}>
@@ -1789,8 +1796,8 @@ export default function App() {
       {!isInner && (
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
-          background: "rgba(255,253,249,.95)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-          borderTop: "0.5px solid rgba(61,43,31,.08)",
+          background: "rgba(255,255,255,.94)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          borderTop: "0.5px solid rgba(22,45,80,.08)",
           paddingBottom: "env(safe-area-inset-bottom)",
           display: "flex", justifyContent: "space-around", alignItems: "center",
           height: 62
