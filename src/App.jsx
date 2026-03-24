@@ -69,10 +69,10 @@ var clearSession = async function() {
 
 /* ═══ Colors ═══ */
 const C = {
-  pri: "#1e293b", priL: "#334155", gold: "#d4a335", goldL: "#e5b84c", goldBg: "#fdf8ed",
-  bg: "#f8f7f4", card: "#ffffff", tx: "#1e293b", txM: "#64748b", txL: "#94a3b8", bdr: "#e5e2dc",
-  ok: "#16a34a", okBg: "#f0fdf4", err: "#dc2626", errBg: "#fef2f2",
-  ph: ["#1e40af", "#15803d", "#b45309", "#7c3aed", "#be185d", "#a16207", "#0d7377", "#9333ea"],
+  pri: "#1a1f36", priL: "#2d3561", gold: "#c8a24e", goldL: "#dbb966", goldBg: "#fdf8ed",
+  bg: "#f7f6f3", card: "#ffffff", tx: "#1a1f36", txM: "#5a607a", txL: "#9298b0", bdr: "#e4e2dc",
+  ok: "#10b981", okBg: "#ecfdf5", err: "#ef4444", errBg: "#fef2f2",
+  ph: ["#3b5bdb", "#0ea575", "#e67e22", "#8b5cf6", "#ec4899", "#d97706", "#0891b2", "#a855f7"],
 };
 const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", senior: "55+" };
 
@@ -132,7 +132,18 @@ div[style*="cursor: pointer"]:active{transform:scale(0.98)!important;opacity:0.9
 .sg>*:nth-child(3){animation-delay:80ms}.sg>*:nth-child(4){animation-delay:120ms}
 .sg>*:nth-child(5){animation-delay:160ms}.sg>*:nth-child(6){animation-delay:200ms}
 .sg>*:nth-child(7){animation-delay:240ms}.sg>*:nth-child(8){animation-delay:280ms}
-input[type=range]{accent-color:${C.gold};height:6px}
+/* Custom range slider */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;
+  background:${C.bdr};border-radius:99px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid #fff;
+  background:linear-gradient(135deg,${C.gold},${C.goldL});
+  box-shadow:0 2px 8px rgba(0,0,0,.15)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;cursor:pointer;
+  border:3px solid #fff;background:linear-gradient(135deg,${C.gold},${C.goldL});
+  box-shadow:0 2px 8px rgba(0,0,0,.15)}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:${C.bdr}}
+input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:${C.bdr}}
 `;
 
 /* ═══ Data ═══ */
@@ -544,46 +555,73 @@ function Login({ onLogin }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "linear-gradient(145deg, #0f172a 0%, #1e3a5f 35%, #2563eb 65%, #d97706 100%)" }}>
+    <div style={{ minHeight: "100vh", direction: "rtl", fontFamily: "'Tajawal',sans-serif", background: "#faf8f5", display: "flex", flexDirection: "column" }}>
       <style>{CSS_TEXT}</style>
-      <div className="si" style={{ maxWidth: 440, width: "100%", background: "rgba(255,255,255,.97)", borderRadius: 22, padding: "36px 30px", boxShadow: "0 28px 72px rgba(0,0,0,.25)" }}>
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 16, margin: "0 auto 12px", background: "linear-gradient(135deg, #2563eb, #d97706)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, boxShadow: "0 6px 20px rgba(37,99,235,.3)" }}>🧭</div>
-          <h1 style={{ fontSize: 20, fontWeight: 900, color: C.pri, marginBottom: 3 }}>شريكك في اكتشاف رسالتك</h1>
-          <p style={{ color: C.txL, fontSize: 13 }}>سجّل دخولك لتكمل رحلتك</p>
+
+      {/* App-like status bar */}
+      <div style={{ background: "#faf8f5", padding: "14px 20px 0", paddingTop: "calc(14px + env(safe-area-inset-top))" }}>
+        <div style={{ textAlign: "center", fontSize: 12, fontWeight: 600, color: "#b8a88a", letterSpacing: 1 }}>شريكك في اكتشاف رسالتك</div>
+      </div>
+
+      {/* Main content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "20px 28px", maxWidth: 440, width: "100%", margin: "0 auto" }}>
+
+        {/* Logo */}
+        <div className="si" style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ width: 76, height: 76, borderRadius: 22, margin: "0 auto 18px", background: "linear-gradient(145deg, #e8dcc8, #c8a24e)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, boxShadow: "0 8px 30px rgba(200,162,78,.2), inset 0 1px 0 rgba(255,255,255,.5)" }}>🧭</div>
+          <h1 style={{ fontSize: 24, fontWeight: 900, color: "#2c2520", marginBottom: 6, letterSpacing: "-.3px" }}>مرحباً بك</h1>
+          <p style={{ color: "#a09484", fontSize: 14, lineHeight: 1.6 }}>سجّل دخولك لتكمل رحلة اكتشاف ذاتك</p>
         </div>
 
         <PWABanner pwa={pwa} />
 
+        {/* Saved accounts */}
         {saved.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: C.txM, marginBottom: 6 }}>حساباتك المحفوظة:</div>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#a09484", marginBottom: 8, textTransform: "uppercase", letterSpacing: 1 }}>حساباتك المحفوظة</div>
             {saved.map(function(a) {
               return (
-                <div key={a.u} onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 11, marginBottom: 5, background: C.pri + "04", border: "1px solid " + C.pri + "10", cursor: "pointer" }}>
-                  <div style={{ width: 34, height: 34, borderRadius: 9, background: "linear-gradient(135deg," + C.gold + "," + C.goldL + ")", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 13 }}>{a.n ? a.n[0] : "?"}</div>
+                <div key={a.u} onClick={function() { doLogin(a.u, a.p); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 16, marginBottom: 6, background: "#fff", border: "1px solid #ede8e0", cursor: "pointer", boxShadow: "0 1px 4px rgba(0,0,0,.03)", transition: "all .15s" }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg, #c8a24e, #dbb966)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 15 }}>{a.n ? a.n[0] : "?"}</div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13, color: C.pri }}>{a.n}</div>
-                    <div style={{ fontSize: 11, color: C.txL }}>@{a.u}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "#2c2520" }}>{a.n}</div>
+                    <div style={{ fontSize: 12, color: "#a09484" }}>@{a.u}</div>
                   </div>
-                  <button onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: C.txL }}>✕</button>
+                  <button onClick={function(e) { e.stopPropagation(); rmSv(a.u); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#c8bfb0", padding: 4 }}>✕</button>
                 </div>
               );
             })}
-            <div style={{ textAlign: "center", margin: "10px 0 0", fontSize: 12, color: C.txL }}>أو سجّل بحساب آخر:</div>
+            <div style={{ textAlign: "center", margin: "14px 0 0" }}>
+              <div style={{ height: 1, background: "#ede8e0", margin: "0 40px 14px" }} />
+              <span style={{ fontSize: 12, color: "#b8a88a" }}>أو سجّل بحساب آخر</span>
+            </div>
           </div>
         )}
 
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", fontWeight: 700, marginBottom: 4, fontSize: 13, color: C.txM }}>اسم المستخدم</label>
-          <Inp value={un} onChange={sUn} placeholder="اسم المستخدم..." icon="👤" />
+        {/* Form */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: 13, color: "#6b5e50" }}>اسم المستخدم</label>
+          <Inp value={un} onChange={sUn} placeholder="اكتب اسم المستخدم..." icon="👤" sx={{ background: "#fff", border: "1.5px solid #ede8e0", borderRadius: 14, padding: "13px 40px 13px 16px" }} />
         </div>
-        <div style={{ marginBottom: 20 }}>
-          <label style={{ display: "block", fontWeight: 700, marginBottom: 4, fontSize: 13, color: C.txM }}>كلمة المرور</label>
-          <Inp value={pw} onChange={sPw} placeholder="كلمة المرور..." type="password" icon="🔒" />
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: "block", fontWeight: 700, marginBottom: 6, fontSize: 13, color: "#6b5e50" }}>كلمة المرور</label>
+          <Inp value={pw} onChange={sPw} placeholder="اكتب كلمة المرور..." type="password" icon="🔒" sx={{ background: "#fff", border: "1.5px solid #ede8e0", borderRadius: 14, padding: "13px 40px 13px 16px" }} />
         </div>
-        {err && <div style={{ background: C.errBg, color: C.err, borderRadius: 10, padding: "9px 12px", fontSize: 13, marginBottom: 12, fontWeight: 600 }}>{err}</div>}
-        <Btn onClick={function() { doLogin(un, pw); }} dis={ld} v="gold" sz="lg" full>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك ←"}</Btn>
+        {err && <div style={{ background: "#fef2f2", color: "#ef4444", borderRadius: 14, padding: "11px 14px", fontSize: 13, marginBottom: 14, fontWeight: 600 }}>{err}</div>}
+        <button onClick={function() { doLogin(un, pw); }} disabled={ld}
+          style={{
+            width: "100%", padding: "15px 0", borderRadius: 16, border: "none",
+            background: "linear-gradient(135deg, #c8a24e, #b8922e)", color: "#fff",
+            fontWeight: 800, fontSize: 16, cursor: ld ? "not-allowed" : "pointer",
+            fontFamily: "'Tajawal',sans-serif", opacity: ld ? 0.6 : 1,
+            boxShadow: "0 4px 16px rgba(200,162,78,.3)",
+            transition: "all .15s", letterSpacing: ".3px"
+          }}>{ld ? "جارٍ التحقق..." : "ادخل إلى رحلتك"}</button>
+      </div>
+
+      {/* Bottom safe area + branding */}
+      <div style={{ padding: "16px 20px", paddingBottom: "calc(16px + env(safe-area-inset-bottom))", textAlign: "center" }}>
+        <p style={{ fontSize: 11, color: "#c8bfb0" }}>رحلة اكتشاف الذات تبدأ من هنا 🧭</p>
       </div>
     </div>
   );
@@ -979,12 +1017,15 @@ function Dash({ user, onNav }) {
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: "18px 14px 50px" }}>
-      <div className="fu" style={{ background: "linear-gradient(140deg," + C.pri + "," + C.priL + " 55%," + C.gold + "40 100%)", borderRadius: 18, padding: "24px 22px 20px", color: "#fff", marginBottom: 14 }}>
-        <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 3 }}>مرحباً 👋</div>
-        <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 1 }}>{user.name}</h2>
-        <div style={{ opacity: 0.55, fontSize: 12, marginBottom: 16 }}>@{user.username}</div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 13 }}><span>التقدم</span><span style={{ fontWeight: 800 }}>{pct}%</span></div>
-        <PB v={pct} color={C.gold} h={8} />
+      <div className="fu" style={{ background: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #c8a24e 100%)", borderRadius: 20, padding: "26px 22px 22px", color: "#fff", marginBottom: 14, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", width: 150, height: 150, borderRadius: "50%", background: "rgba(200,162,78,.12)", top: -40, left: -20 }} />
+        <div style={{ position: "relative" }}>
+          <div style={{ fontSize: 13, opacity: 0.7, marginBottom: 3 }}>مرحباً 👋</div>
+          <h2 style={{ fontSize: 20, fontWeight: 900, marginBottom: 1 }}>{user.name}</h2>
+          <div style={{ opacity: 0.55, fontSize: 12, marginBottom: 16 }}>@{user.username}</div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 13 }}><span>التقدم</span><span style={{ fontWeight: 800 }}>{pct}%</span></div>
+          <PB v={pct} color={C.gold} h={8} />
+        </div>
       </div>
 
       <Crd cls="fu" sx={{ background: C.goldBg, border: "1px solid " + C.gold + "18", marginBottom: 14, padding: 16 }}>
@@ -1574,7 +1615,7 @@ export default function App() {
       theme.name = "theme-color";
       document.head.appendChild(theme);
     }
-    theme.content = C.pri;
+    theme.content = "#faf8f5";
     // Mobile-first CSS fixes
     var style = document.createElement("style");
     style.textContent = [
@@ -1585,6 +1626,12 @@ export default function App() {
     ].join("");
     document.head.appendChild(style);
   }, []);
+
+  /* Update theme-color when auth changes */
+  useEffect(function() {
+    var theme = document.querySelector('meta[name="theme-color"]');
+    if (theme) theme.content = auth ? (auth.isAdmin ? C.pri : C.bg) : "#faf8f5";
+  }, [auth]);
 
   useEffect(function() {
     // 1. Try restore session
