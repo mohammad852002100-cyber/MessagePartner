@@ -1,6 +1,7 @@
 import { registerSW } from 'virtual:pwa-register'
 
 registerSW({ immediate: true })
+
 import { useState, useEffect, useRef } from "react";
 
 /* ═══ Supabase Database ═══ */
@@ -66,37 +67,54 @@ const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", 
 const CSS_TEXT = `
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:rtl;
   -webkit-overflow-scrolling:touch;overscroll-behavior-y:none;
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
-  padding-right:env(safe-area-inset-right);padding-left:env(safe-area-inset-left)}
+  padding-right:env(safe-area-inset-right);padding-left:env(safe-area-inset-left);
+  position:relative;width:100%;overflow-x:hidden}
 textarea,input,select,button{font-family:inherit;font-size:16px}
-input[type=text],input[type=password],textarea,select{font-size:16px!important}
-/* Hide scrollbar everywhere */
+input[type=text],input[type=password],textarea,select{font-size:16px!important;
+  border-radius:0!important;-webkit-appearance:none;appearance:none;border-radius:11px!important}
+/* Hide scrollbar */
 *{scrollbar-width:none;-ms-overflow-style:none}
 *::-webkit-scrollbar{display:none}
-button{-webkit-tap-highlight-color:transparent}
-/* Prevent pull-to-refresh */
-html,body{overscroll-behavior:none}
-/* Smooth image rendering */
+/* Native touch feel */
+button{-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{overscroll-behavior:none;touch-action:manipulation}
 img,svg{max-width:100%;height:auto}
-/* Fix iOS input zoom */
+/* No text select on UI — only on content */
+h1,h2,h3,h4,label,nav,button,span[style]{-webkit-user-select:none;user-select:none}
+p,textarea,input,div[style*="pre-line"]{-webkit-user-select:text;user-select:text}
+/* Disable long-press context menu on UI */
+nav,button{-webkit-touch-callout:none}
+/* Press feedback on all tappable items */
+button:active{transform:scale(0.96)!important;opacity:0.85!important}
+div[style*="cursor: pointer"]:active{transform:scale(0.98)!important;opacity:0.9!important}
+/* Smooth transitions */
+*{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+/* Fix iOS */
 @supports (-webkit-touch-callout:none){
   input,textarea,select{font-size:16px!important}
 }
+/* Animations */
 @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes sd{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes pl{0%,100%{opacity:1}50%{opacity:.4}}
-.fu{animation:fu .4s ease both}
-.si{animation:si .35s ease both}
-.sg>*{animation:fu .4s ease both}
-.sg>*:nth-child(1){animation-delay:0ms}.sg>*:nth-child(2){animation-delay:50ms}
-.sg>*:nth-child(3){animation-delay:100ms}.sg>*:nth-child(4){animation-delay:150ms}
-.sg>*:nth-child(5){animation-delay:200ms}.sg>*:nth-child(6){animation-delay:250ms}
-.sg>*:nth-child(7){animation-delay:300ms}.sg>*:nth-child(8){animation-delay:350ms}
+@keyframes slideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeScale{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.fu{animation:fu .35s ease both}
+.si{animation:si .3s ease both}
+.slideIn{animation:slideIn .3s ease both}
+.fadeScale{animation:fadeScale .3s ease both}
+.sg>*{animation:fu .35s ease both}
+.sg>*:nth-child(1){animation-delay:0ms}.sg>*:nth-child(2){animation-delay:40ms}
+.sg>*:nth-child(3){animation-delay:80ms}.sg>*:nth-child(4){animation-delay:120ms}
+.sg>*:nth-child(5){animation-delay:160ms}.sg>*:nth-child(6){animation-delay:200ms}
+.sg>*:nth-child(7){animation-delay:240ms}.sg>*:nth-child(8){animation-delay:280ms}
 input[type=range]{accent-color:${C.gold};height:6px}
 `;
 
@@ -274,7 +292,8 @@ function Btn({ onClick, children, v, sz, dis, full, sx }) {
     <button onClick={onClick} disabled={dis} style={{
       padding: ss.p, fontSize: ss.f, background: vv.bg, color: vv.c, border: vv.b,
       borderRadius: 10, cursor: dis ? "not-allowed" : "pointer", fontWeight: 700,
-      opacity: dis ? 0.5 : 1, transition: "all .2s", width: full ? "100%" : "auto", ...(sx || {})
+      opacity: dis ? 0.5 : 1, transition: "all .15s ease", width: full ? "100%" : "auto",
+      WebkitTapHighlightColor: "transparent", transform: "scale(1)", ...(sx || {})
     }}>{children}</button>
   );
 }
@@ -379,6 +398,129 @@ function FloatingBack({ onClick }) {
   );
 }
 
+/* ═══ PWA Install Support ═══ */
+var _deferredPrompt = null;
+
+function usePWA() {
+  const [canInstall, setCanInstall] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(function() {
+    // Check if running as installed PWA
+    var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    setIsStandalone(standalone);
+
+    // Detect iOS
+    var ua = navigator.userAgent || "";
+    var isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    setIsIOS(isiOS);
+
+    // If iOS and in browser (not standalone) — show manual instructions
+    if (isiOS && !standalone) {
+      setCanInstall(true);
+    }
+
+    // Android/Chrome — capture install prompt
+    function onPrompt(e) {
+      e.preventDefault();
+      _deferredPrompt = e;
+      setCanInstall(true);
+    }
+    window.addEventListener("beforeinstallprompt", onPrompt);
+
+    // Inject PWA manifest
+    if (!document.querySelector('link[rel="manifest"]')) {
+      var manifest = {
+        name: "رسالتك في الحياة",
+        short_name: "رسالتك",
+        description: "رحلة اكتشاف رسالتك الشخصية",
+        start_url: window.location.href.split("?")[0],
+        display: "standalone",
+        background_color: "#f5f3ee",
+        theme_color: "#0c1f3f",
+        orientation: "portrait",
+        icons: [
+          { src: "https://api.iconify.design/noto:compass.svg", sizes: "any", type: "image/svg+xml" }
+        ]
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("link");
+      link.rel = "manifest";
+      link.href = url;
+      document.head.appendChild(link);
+    }
+
+    return function() { window.removeEventListener("beforeinstallprompt", onPrompt); };
+  }, []);
+
+  function triggerInstall() {
+    if (_deferredPrompt) {
+      _deferredPrompt.prompt();
+      _deferredPrompt.userChoice.then(function() { _deferredPrompt = null; setCanInstall(false); });
+    }
+  }
+
+  return { canInstall: canInstall, isStandalone: isStandalone, isIOS: isIOS, triggerInstall: triggerInstall };
+}
+
+function PWABanner({ pwa }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (pwa.isStandalone || !pwa.canInstall || dismissed) return null;
+
+  return (
+    <div style={{
+      background: "rgba(255,255,255,.95)", backdropFilter: "blur(10px)",
+      borderRadius: 16, padding: "16px 18px", marginBottom: 20,
+      border: "1px solid " + C.gold + "30", boxShadow: "0 4px 20px rgba(0,0,0,.08)",
+      direction: "rtl"
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 22 }}>📲</span>
+          <span style={{ fontWeight: 800, fontSize: 14, color: C.pri }}>حمّل التطبيق</span>
+        </div>
+        <button onClick={function() { setDismissed(true); }} style={{
+          background: "none", border: "none", cursor: "pointer", fontSize: 16,
+          color: C.txL, padding: 4, lineHeight: 1
+        }}>✕</button>
+      </div>
+
+      {pwa.isIOS ? (
+        <div>
+          <p style={{ fontSize: 13, color: C.txM, lineHeight: 1.8, margin: "0 0 12px" }}>
+            أضف التطبيق للشاشة الرئيسية لتجربة أسرع وأسهل:
+          </p>
+          <div style={{ background: C.pri + "06", borderRadius: 10, padding: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <span style={{ background: C.pri, color: "#fff", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>1</span>
+              <span style={{ fontSize: 13, color: C.tx }}>اضغط على زر المشاركة <span style={{ fontSize: 16 }}>⬆️</span> أسفل الشاشة</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span style={{ background: C.pri, color: "#fff", borderRadius: 6, width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800 }}>2</span>
+              <span style={{ fontSize: 13, color: C.tx }}>اختر <strong>إضافة إلى الشاشة الرئيسية</strong> ➕</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <p style={{ fontSize: 13, color: C.txM, lineHeight: 1.8, margin: "0 0 10px" }}>
+            حمّل التطبيق على هاتفك لفتحه بشكل أسرع بدون متصفح
+          </p>
+          <button onClick={pwa.triggerInstall} style={{
+            width: "100%", padding: "11px 0", borderRadius: 10, border: "none",
+            background: "linear-gradient(135deg," + C.gold + "," + C.goldL + ")",
+            color: "#fff", fontWeight: 800, fontSize: 14, cursor: "pointer",
+            fontFamily: "'Tajawal',sans-serif"
+          }}>⬇️ تثبيت التطبيق</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ═══ Login ═══ */
 function Login({ onLogin }) {
   const [un, sUn] = useState("");
@@ -386,6 +528,7 @@ function Login({ onLogin }) {
   const [err, sErr] = useState("");
   const [ld, sLd] = useState(false);
   const [saved, sSv] = useState([]);
+  var pwa = usePWA();
 
   useEffect(function() { gSaved().then(function(s) { sSv(s || []); }); }, []);
 
@@ -427,6 +570,8 @@ function Login({ onLogin }) {
           <p style={{ color: C.txL, fontSize: 13 }}>سجّل دخولك لتكمل رحلتك</p>
         </div>
 
+        <PWABanner pwa={pwa} />
+
         {saved.length > 0 && (
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: C.txM, marginBottom: 6 }}>حساباتك المحفوظة:</div>
@@ -465,14 +610,12 @@ function Login({ onLogin }) {
 function LsnV({ lesson, onDone, onBack }) {
   var ph = PHASES.find(function(x) { return x.id === lesson.p; });
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto", padding: "18px 14px 56px" }}>
-      <div className="fu" style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
-        <Btn onClick={onBack} v="ghost" sz="sm">→ العودة</Btn>
-        <Badge color={ph.color}>{ph.icon} {ph.title}</Badge>
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "10px 14px 56px" }}>
+      <div className="fu" style={{ marginBottom: 14 }}>
+        <Badge color={ph.color}>{ph.icon} {ph.title} · الدرس {lesson.n}</Badge>
       </div>
-      <Crd cls="fu" sx={{ borderTop: "4px solid " + ph.color }}>
-        <h2 style={{ color: C.pri, fontSize: 19, fontWeight: 900, marginBottom: 2 }}>{lesson.title}</h2>
-        <p style={{ color: C.txL, fontSize: 12, marginBottom: 22 }}>الدرس {lesson.n} · المرحلة {lesson.p}</p>
+      <Crd cls="fadeScale" sx={{ borderTop: "4px solid " + ph.color }}>
+        <h2 style={{ color: C.pri, fontSize: 19, fontWeight: 900, marginBottom: 16 }}>{lesson.title}</h2>
         {lesson.content.map(function(s, i) {
           return (
             <div key={i} style={{ marginBottom: 22 }}>
@@ -482,10 +625,9 @@ function LsnV({ lesson, onDone, onBack }) {
           );
         })}
         <div style={{ borderTop: "1px solid " + C.bdr, paddingTop: 16 }}>
-          <Btn onClick={onDone} v="gold" sz="lg">أنهيت الدرس ✓</Btn>
+          <Btn onClick={onDone} v="gold" sz="lg" full>أنهيت الدرس ✓</Btn>
         </div>
       </Crd>
-      <FloatingBack onClick={onBack} />
     </div>
   );
 }
@@ -759,13 +901,12 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: "0 auto", padding: "18px 14px 70px" }}>
+    <div style={{ maxWidth: 680, margin: "0 auto", padding: "10px 14px 70px" }}>
       {toast && <Toast msg={toast} onClose={function() { sT(""); }} />}
-      <div className="fu" style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
-        <Btn onClick={onBack} v="ghost" sz="sm">→ العودة</Btn>
+      <div className="fu" style={{ marginBottom: 14 }}>
         <Badge color={ph.color}>{ph.icon} {ph.title}</Badge>
       </div>
-      <Crd cls="fu" sx={{ borderTop: "4px solid " + C.gold }}>
+      <Crd cls="fadeScale" sx={{ borderTop: "4px solid " + C.gold }}>
         <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 20 }}>
           <span style={{ fontSize: 30 }}>{ex.icon}</span>
           <div>
@@ -775,11 +916,10 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         </div>
         {renderEx()}
         <div style={{ borderTop: "1px solid " + C.bdr, paddingTop: 14, marginTop: 8, display: "flex", gap: 7, flexWrap: "wrap" }}>
-          <Btn onClick={hSave} v="soft" sz="sm">💾 حفظ الإجابات</Btn>
-          <Btn onClick={function() { hSave(); onDone(); }} v="gold">أنهيت التمرين ✓</Btn>
+          <Btn onClick={hSave} v="soft" sz="sm">💾 حفظ</Btn>
+          <Btn onClick={function() { hSave(); onDone(); }} v="gold" sx={{ flex: 1 }}>أنهيت التمرين ✓</Btn>
         </div>
       </Crd>
-      <FloatingBack onClick={onBack} />
     </div>
   );
 }
@@ -1532,11 +1672,12 @@ export default function App() {
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
   if (ld) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl" }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl", background: C.pri }}>
       <style>{CSS_TEXT}</style>
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontSize: 40, animation: "fl 2s ease-in-out infinite", marginBottom: 10 }}>🧭</div>
-        <p style={{ color: C.txL }}>جارٍ التحميل...</p>
+        <div style={{ width: 80, height: 80, borderRadius: 22, margin: "0 auto 18px", background: "linear-gradient(135deg," + C.gold + "," + C.goldL + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, boxShadow: "0 8px 32px rgba(0,0,0,.3)", animation: "splashPulse 2s ease-in-out infinite" }}>🧭</div>
+        <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 900, marginBottom: 6 }}>رسالتك</h1>
+        <p style={{ color: "rgba(255,255,255,.5)", fontSize: 13 }}>جارٍ التحميل...</p>
       </div>
     </div>
   );
@@ -1544,56 +1685,116 @@ export default function App() {
   if (!auth) return (<Login onLogin={function(u) { sAuth(u); sV("dash"); }} />);
   if (auth.isAdmin) return (<Admin onLogout={function() { sAuth(null); }} />);
 
-  var showNav = view !== "lesson" && view !== "exercise";
+  var isInner = view === "lesson" || view === "exercise";
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Tajawal',sans-serif", direction: "rtl" }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Tajawal',sans-serif", direction: "rtl", paddingBottom: isInner ? 0 : 72 }}>
       <style>{CSS_TEXT}</style>
 
-      {showNav && (
-        <nav style={{ background: "rgba(255,255,255,.92)", backdropFilter: "blur(10px)", borderBottom: "1px solid " + C.bdr, padding: "0 14px", position: "sticky", top: 0, zIndex: 100 }}>
-          <div style={{ maxWidth: 700, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 50 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5 }}><span style={{ fontSize: 16 }}>🧭</span><span style={{ fontSize: 14, fontWeight: 900, color: C.pri }}>رسالتك</span></div>
-            <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {[{ v: "dash", l: "الرئيسية", i: "🏠" }, { v: "phases", l: "الرحلة", i: "🗺️" }].map(function(x) {
-                return <button key={x.v} onClick={function() { nav(x.v, null); }} style={{ background: view === x.v ? C.pri + "08" : "none", border: "none", padding: "5px 10px", borderRadius: 7, cursor: "pointer", color: view === x.v ? C.pri : C.txL, fontWeight: view === x.v ? 800 : 500, fontSize: 12, fontFamily: "inherit" }}>{x.i} {x.l}</button>;
-              })}
-              <button onClick={function() { sAuth(null); }} style={{ background: "none", border: "1px solid " + C.bdr, padding: "4px 8px", borderRadius: 7, cursor: "pointer", color: C.txL, fontSize: 11, fontFamily: "inherit", marginRight: 3 }}>خروج</button>
-            </div>
-          </div>
-        </nav>
-      )}
-
-      {view === "dash" && <Dash user={auth} onNav={nav} />}
-
-      {view === "phases" && (
-        <div style={{ maxWidth: 680, margin: "0 auto", padding: "18px 14px 50px" }}>
-          <h2 style={{ color: C.pri, fontSize: 17, fontWeight: 900, marginBottom: 14 }}>🗺️ مراحل الرحلة</h2>
-          {PHASES.map(function(ph) {
-            var pL = LESSONS.filter(function(l) { return l.p === ph.id; });
-            var pE = EX.filter(function(e) { return e.p === ph.id; });
-            var d = pL.filter(function(l) { return (auth.completedLessons || []).indexOf(l.p + "-" + l.n) >= 0; }).length + pE.filter(function(e) { return (auth.completedExercises || []).indexOf(e.id) >= 0; }).length;
-            var pp = Math.round(d / (pL.length + pE.length) * 100);
-            return (
-              <Crd key={ph.id} onClick={function() { nav("phase", ph.id); }} sx={{ marginBottom: 7, padding: 16, cursor: "pointer" }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                  <span style={{ fontSize: 26 }}>{ph.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 800, fontSize: 13, color: ph.color, marginBottom: 2 }}>المرحلة {ph.id}: {ph.title}</div>
-                    <div style={{ fontSize: 11, color: C.txL, marginBottom: 5 }}>{ph.sub}</div>
-                    <PB v={pp} color={ph.color} h={4} />
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 900, color: ph.color }}>{pp}%</div>
-                </div>
-              </Crd>
-            );
-          })}
+      {/* Native-style header for inner pages */}
+      {isInner && (
+        <div style={{
+          position: "sticky", top: 0, zIndex: 100,
+          background: "rgba(245,243,238,.92)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+          borderBottom: "0.5px solid rgba(0,0,0,.08)",
+          padding: "0 16px", height: 48,
+          display: "flex", alignItems: "center", justifyContent: "space-between"
+        }}>
+          <button onClick={function() {
+            if (view === "lesson" && vd) nav("phase", vd.p);
+            else if (view === "exercise" && exO) nav("phase", exO.p);
+          }} style={{
+            background: "none", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 4,
+            color: C.gold, fontSize: 14, fontWeight: 700, fontFamily: "inherit",
+            padding: "8px 4px"
+          }}>→ رجوع</button>
+          <span style={{ fontSize: 14, fontWeight: 800, color: C.pri }}>
+            {view === "lesson" && vd ? vd.title : ""}
+            {view === "exercise" && exO ? exO.title : ""}
+          </span>
+          <div style={{ width: 60 }}></div>
         </div>
       )}
 
-      {view === "phase" && <PhV phId={vd} user={auth} onL={function(l) { nav("lesson", l); }} onE={openE} onBack={function() { nav("dash"); }} />}
-      {view === "lesson" && vd && <LsnV lesson={vd} onDone={function() { doneL(vd); }} onBack={function() { nav("phase", vd.p); }} />}
-      {view === "exercise" && exO && <ExV ex={exO} saved={exS} user={auth} onSave={function(ans2) { saveE(exO, ans2); }} onDone={function() { doneE(exO); }} onBack={function() { nav("phase", exO.p); }} />}
+      {/* Page content with transition */}
+      <div className="fadeScale" key={view + "-" + (vd && vd.id || vd || "")}>
+        {view === "dash" && <Dash user={auth} onNav={nav} />}
+
+        {view === "phases" && (
+          <div style={{ maxWidth: 680, margin: "0 auto", padding: "18px 14px 20px" }}>
+            <h2 style={{ color: C.pri, fontSize: 17, fontWeight: 900, marginBottom: 14 }}>🗺️ مراحل الرحلة</h2>
+            {PHASES.map(function(ph) {
+              var pL = LESSONS.filter(function(l) { return l.p === ph.id; });
+              var pE = EX.filter(function(e) { return e.p === ph.id; });
+              var d = pL.filter(function(l) { return (auth.completedLessons || []).indexOf(l.p + "-" + l.n) >= 0; }).length + pE.filter(function(e) { return (auth.completedExercises || []).indexOf(e.id) >= 0; }).length;
+              var pp = Math.round(d / (pL.length + pE.length) * 100);
+              return (
+                <Crd key={ph.id} onClick={function() { nav("phase", ph.id); }} sx={{ marginBottom: 7, padding: 16, cursor: "pointer" }}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                    <span style={{ fontSize: 26 }}>{ph.icon}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 800, fontSize: 13, color: ph.color, marginBottom: 2 }}>المرحلة {ph.id}: {ph.title}</div>
+                      <div style={{ fontSize: 11, color: C.txL, marginBottom: 5 }}>{ph.sub}</div>
+                      <PB v={pp} color={ph.color} h={4} />
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 900, color: ph.color }}>{pp}%</div>
+                  </div>
+                </Crd>
+              );
+            })}
+          </div>
+        )}
+
+        {view === "phase" && <PhV phId={vd} user={auth} onL={function(l) { nav("lesson", l); }} onE={openE} onBack={function() { nav("dash"); }} />}
+        {view === "lesson" && vd && <LsnV lesson={vd} onDone={function() { doneL(vd); }} onBack={function() { nav("phase", vd.p); }} />}
+        {view === "exercise" && exO && <ExV ex={exO} saved={exS} user={auth} onSave={function(ans2) { saveE(exO, ans2); }} onDone={function() { doneE(exO); }} onBack={function() { nav("phase", exO.p); }} />}
+      </div>
+
+      {/* ═══ Bottom Tab Bar — like native app ═══ */}
+      {!isInner && (
+        <div style={{
+          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
+          background: "rgba(255,255,255,.95)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+          borderTop: "0.5px solid rgba(0,0,0,.08)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          display: "flex", justifyContent: "space-around", alignItems: "center",
+          height: 62
+        }}>
+          {[
+            { v: "dash", i: "🏠", l: "الرئيسية" },
+            { v: "phases", i: "🗺️", l: "الرحلة" },
+          ].map(function(tab) {
+            var active = view === tab.v || (tab.v === "phases" && view === "phase");
+            return (
+              <button key={tab.v} onClick={function() { nav(tab.v, null); }}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                  padding: "6px 20px", fontFamily: "inherit",
+                  color: active ? C.gold : C.txL,
+                  transition: "all .15s ease",
+                  transform: "scale(1)"
+                }}>
+                <span style={{ fontSize: 22, lineHeight: 1, transition: "transform .15s", transform: active ? "scale(1.15)" : "scale(1)" }}>{tab.i}</span>
+                <span style={{ fontSize: 10, fontWeight: active ? 800 : 500, letterSpacing: ".3px" }}>{tab.l}</span>
+                {active && <div style={{ width: 4, height: 4, borderRadius: "50%", background: C.gold, marginTop: 1 }} />}
+              </button>
+            );
+          })}
+          {/* Profile/logout button */}
+          <button onClick={function() { sAuth(null); }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+              padding: "6px 20px", fontFamily: "inherit",
+              color: C.txL, transition: "all .15s ease", transform: "scale(1)"
+            }}>
+            <span style={{ fontSize: 22, lineHeight: 1 }}>👤</span>
+            <span style={{ fontSize: 10, fontWeight: 500 }}>خروج</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
