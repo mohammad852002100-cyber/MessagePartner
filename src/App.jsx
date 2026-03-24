@@ -1,3 +1,6 @@
+import { registerSW } from 'virtual:pwa-register'
+
+registerSW({ immediate: true })
 import { useState, useEffect, useRef } from "react";
 
 /* ═══ Supabase Database ═══ */
