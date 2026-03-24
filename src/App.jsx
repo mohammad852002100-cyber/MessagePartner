@@ -57,10 +57,10 @@ var sSaved = async function(a) {
 
 /* ═══ Colors ═══ */
 const C = {
-  pri: "#0c1f3f", priL: "#1b3a6b", gold: "#b8860b", goldL: "#d4a017", goldBg: "#fef9ec",
-  bg: "#f5f3ee", card: "#fff", tx: "#1a1a2e", txM: "#555770", txL: "#8b8fa3", bdr: "#e5e1d8",
-  ok: "#16794a", okBg: "#edfaf3", err: "#c0392b", errBg: "#fdf0ef",
-  ph: ["#1b3a6b", "#1a6b42", "#8b4513", "#4a148c", "#880e4f", "#6d4c00", "#0d5c5c", "#6a1b9a"],
+  pri: "#1e293b", priL: "#334155", gold: "#d4a335", goldL: "#e5b84c", goldBg: "#fdf8ed",
+  bg: "#f8f7f4", card: "#ffffff", tx: "#1e293b", txM: "#64748b", txL: "#94a3b8", bdr: "#e5e2dc",
+  ok: "#16a34a", okBg: "#f0fdf4", err: "#dc2626", errBg: "#fef2f2",
+  ph: ["#1e40af", "#15803d", "#b45309", "#7c3aed", "#be185d", "#a16207", "#0d7377", "#9333ea"],
 };
 const ST = { teen: "مراهق", young: "شاب", mid: "منتصف العمر", senior: "55+" };
 
@@ -73,8 +73,9 @@ body{font-family:'Tajawal',system-ui;background:${C.bg};color:${C.tx};direction:
   padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
   padding-right:env(safe-area-inset-right);padding-left:env(safe-area-inset-left);
   position:relative;width:100%;overflow-x:hidden}
-textarea,input,select,button{font-family:inherit;font-size:16px}
-input[type=text],input[type=password],textarea,select{font-size:16px!important;
+textarea,input,select,button{font-family:inherit;font-size:16px;color:${C.tx}}
+input[type=text],input[type=password],textarea,select{font-size:16px!important;color:${C.tx}!important;
+  -webkit-text-fill-color:${C.tx}!important;
   border-radius:0!important;-webkit-appearance:none;appearance:none;border-radius:11px!important}
 /* Hide scrollbar */
 *{scrollbar-width:none;-ms-overflow-style:none}
@@ -86,6 +87,10 @@ img,svg{max-width:100%;height:auto}
 /* No text select on UI — only on content */
 h1,h2,h3,h4,label,nav,button,span[style]{-webkit-user-select:none;user-select:none}
 p,textarea,input,div[style*="pre-line"]{-webkit-user-select:text;user-select:text}
+/* Input styling */
+input,textarea,select{color-scheme:light;background-color:#fff}
+::placeholder{color:${C.txL};opacity:1;-webkit-text-fill-color:${C.txL}}
+::-webkit-input-placeholder{color:${C.txL};-webkit-text-fill-color:${C.txL}}
 /* Disable long-press context menu on UI */
 nav,button{-webkit-touch-callout:none}
 /* Press feedback on all tappable items */
@@ -336,7 +341,7 @@ function TA({ value, onChange, placeholder, rows }) {
   return (
     <textarea value={value || ""} onChange={function(e) { onChange(e.target.value); }}
       placeholder={placeholder || "اكتب إجابتك هنا..."} rows={rows || 4}
-      style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 11, padding: "11px 14px", fontSize: 14, lineHeight: 2, resize: "vertical", direction: "rtl", background: "#fafaf7", outline: "none" }}
+      style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 11, padding: "11px 14px", fontSize: 14, lineHeight: 2, resize: "vertical", direction: "rtl", background: "#fff", color: C.tx, outline: "none", WebkitTextFillColor: C.tx }}
       onFocus={function(e) { e.target.style.borderColor = C.gold; }}
       onBlur={function(e) { e.target.style.borderColor = C.bdr; }}
     />
@@ -349,7 +354,7 @@ function Inp({ value, onChange, placeholder, type, icon, sx }) {
       {icon && <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", fontSize: 14, pointerEvents: "none" }}>{icon}</span>}
       <input type={type || "text"} value={value || ""} onChange={function(e) { onChange(e.target.value); }}
         placeholder={placeholder}
-        style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 11, padding: icon ? "10px 36px 10px 14px" : "10px 14px", fontSize: 14, direction: "rtl", background: "#fafaf7", outline: "none", ...(sx || {}) }}
+        style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 11, padding: icon ? "10px 36px 10px 14px" : "10px 14px", fontSize: 14, direction: "rtl", background: "#fff", color: C.tx, WebkitTextFillColor: C.tx, outline: "none", ...(sx || {}) }}
         onFocus={function(e) { e.target.style.borderColor = C.gold; }}
         onBlur={function(e) { e.target.style.borderColor = C.bdr; }}
       />
@@ -403,57 +408,21 @@ var _deferredPrompt = null;
 
 function usePWA() {
   const [canInstall, setCanInstall] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone] = useState(function() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  });
+  const [isIOS] = useState(function() {
+    var ua = navigator.userAgent || "";
+    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  });
 
   useEffect(function() {
-    // Check if running as installed PWA
-    var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-    setIsStandalone(standalone);
-
-    // Detect iOS
-    var ua = navigator.userAgent || "";
-    var isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    setIsIOS(isiOS);
-
-    // If iOS and in browser (not standalone) — show manual instructions
-    if (isiOS && !standalone) {
-      setCanInstall(true);
-    }
-
-    // Android/Chrome — capture install prompt
-    function onPrompt(e) {
-      e.preventDefault();
-      _deferredPrompt = e;
-      setCanInstall(true);
-    }
+    if (isStandalone) return;
+    if (isIOS) { setCanInstall(true); return; }
+    function onPrompt(e) { e.preventDefault(); _deferredPrompt = e; setCanInstall(true); }
     window.addEventListener("beforeinstallprompt", onPrompt);
-
-    // Inject PWA manifest
-    if (!document.querySelector('link[rel="manifest"]')) {
-      var manifest = {
-        name: "رسالتك في الحياة",
-        short_name: "رسالتك",
-        description: "رحلة اكتشاف رسالتك الشخصية",
-        start_url: window.location.href.split("?")[0],
-        display: "standalone",
-        background_color: "#f5f3ee",
-        theme_color: "#0c1f3f",
-        orientation: "portrait",
-        icons: [
-          { src: "https://api.iconify.design/noto:compass.svg", sizes: "any", type: "image/svg+xml" }
-        ]
-      };
-      var blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("link");
-      link.rel = "manifest";
-      link.href = url;
-      document.head.appendChild(link);
-    }
-
     return function() { window.removeEventListener("beforeinstallprompt", onPrompt); };
-  }, []);
+  }, [isStandalone, isIOS]);
 
   function triggerInstall() {
     if (_deferredPrompt) {
@@ -679,14 +648,14 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>مدى قوة التزامك (1=لا أوافق، 7=أوافق تماماً)</h3>
           {cq.map(function(q, i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
               <SL value={a["c" + i]} onChange={function(v) { up("c" + i, v); }} />
             </div>
           ); })}
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginTop: 16, marginBottom: 10 }}>مدى نشاط استكشافك</h3>
           {eq.map(function(q, i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
               <SL value={a["e" + i]} onChange={function(v) { up("e" + i, v); }} />
             </div>
@@ -706,7 +675,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 4 }}>قيّم هذه القيم (1=ليست مهمة، 10=مهمة جداً)</h3>
           <p style={{ fontSize: 12, color: C.txL, marginBottom: 12 }}>اقرأ شرح كل قيمة بعناية ثم قيّمها</p>
           {VD.map(function(vd, i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 3px", fontSize: 14, fontWeight: 700, color: C.pri }}>{vd.n}</p>
               <p style={{ margin: "0 0 8px", fontSize: 12, color: C.txM, lineHeight: 1.7 }}>{vd.d}</p>
               <SL value={a["v" + i]} onChange={function(v) { up("v" + i, v); }} min={1} max={10} />
@@ -728,7 +697,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>قيّم كل مجال</h3>
           {ex.domains.map(function(d, i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700 }}>{d}</p>
               <SL value={a["imp" + i]} onChange={function(v) { up("imp" + i, v); }} min={1} max={10} label="الأهمية لي" />
               <SL value={a["con" + i]} onChange={function(v) { up("con" + i, v); }} min={1} max={10} label="اتساق سلوكي" />
@@ -747,7 +716,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>قيّم نقاط القوة (1-5)</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 12 }}>
             {ex.strengths.map(function(s, i) { return (
-              <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
+              <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 5 }}>{s}</div>
                 <div style={{ display: "flex", gap: 4 }}>
                   {[1, 2, 3, 4, 5].map(function(n) { return (
@@ -774,7 +743,7 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
         <div>
           <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>سجّل 5 أنشطة</h3>
           {[0, 1, 2, 3, 4].map(function(i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <Inp value={a["fa" + i] || ""} onChange={function(v) { up("fa" + i, v); }} placeholder={"النشاط " + (i + 1)} sx={{ marginBottom: 6 }} />
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 110 }}><SL value={a["fe" + i]} onChange={function(v) { up("fe" + i, v); }} min={1} max={5} label="الاندماج" /></div>
@@ -834,11 +803,11 @@ function ExV({ ex, saved, user, onSave, onDone, onBack }) {
 
           {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-            <div style={{ background: "#fafaf7", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
+            <div style={{ background: "#fafaf9", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: C.gold }}>{answeredCount}</div>
               <div style={{ fontSize: 11, color: C.txL }}>تمرين مُجاب</div>
             </div>
-            <div style={{ background: "#fafaf7", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
+            <div style={{ background: "#fafaf9", borderRadius: 10, padding: 14, textAlign: "center", border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: C.pri }}>{totalFields}</div>
               <div style={{ fontSize: 11, color: C.txL }}>إجابة إجمالية</div>
             </div>
@@ -1058,7 +1027,7 @@ function ExReadOnly({ ex, answers }) {
 
   function ROText({ value }) {
     if (!value) return <div style={{ color: C.txL, fontSize: 13, fontStyle: "italic", padding: "8px 12px" }}>لم يُجب بعد</div>;
-    return <div style={{ fontSize: 14, lineHeight: 2, background: "#fafaf7", borderRadius: 10, padding: "10px 14px", border: "1px solid " + C.bdr, whiteSpace: "pre-line", color: C.tx }}>{value}</div>;
+    return <div style={{ fontSize: 14, lineHeight: 2, background: "#fafaf9", borderRadius: 10, padding: "10px 14px", border: "1px solid " + C.bdr, whiteSpace: "pre-line", color: C.tx }}>{value}</div>;
   }
 
   function ROSlider({ value, min, max, label }) {
@@ -1098,14 +1067,14 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>مدى قوة الالتزام</h3>
         {cq.map(function(q, i) { return (
-          <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
             <ROSlider value={a["c" + i]} />
           </div>
         ); })}
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginTop: 16, marginBottom: 10 }}>مدى نشاط الاستكشاف</h3>
         {eq.map(function(q, i) { return (
-          <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 5, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 5px", fontSize: 13, fontWeight: 600 }}>{q}</p>
             <ROSlider value={a["e" + i]} />
           </div>
@@ -1124,7 +1093,7 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 12 }}>تقييم القيم</h3>
         {VD.map(function(vd, i) { return (
-          <div key={i} style={{ background: "#fafaf7", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#fafaf9", borderRadius: 11, padding: 14, marginBottom: 7, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 3px", fontSize: 14, fontWeight: 700, color: C.pri }}>{vd.n}</p>
             <p style={{ margin: "0 0 8px", fontSize: 12, color: C.txM, lineHeight: 1.7 }}>{vd.d}</p>
             <ROSlider value={a["v" + i]} min={1} max={10} />
@@ -1147,7 +1116,7 @@ function ExReadOnly({ ex, answers }) {
       <div>
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>تقييم المجالات</h3>
         {(ex.domains || []).map(function(d, i) { return (
-          <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+          <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
             <p style={{ margin: "0 0 6px", fontSize: 13, fontWeight: 700 }}>{d}</p>
             <ROSlider value={a["imp" + i]} min={1} max={10} label="الأهمية" />
             <ROSlider value={a["con" + i]} min={1} max={10} label="الاتساق" />
@@ -1172,7 +1141,7 @@ function ExReadOnly({ ex, answers }) {
         <h3 style={{ color: C.pri, fontSize: 14, fontWeight: 800, marginBottom: 10 }}>تقييم نقاط القوة</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 12 }}>
           {(ex.strengths || []).map(function(s, i) { return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 9, border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 5 }}>{s}</div>
               <div style={{ display: "flex", gap: 4 }}>
                 {[1, 2, 3, 4, 5].map(function(n) { return (
@@ -1201,7 +1170,7 @@ function ExReadOnly({ ex, answers }) {
         {[0, 1, 2, 3, 4].map(function(i) {
           if (!a["fa" + i]) return null;
           return (
-            <div key={i} style={{ background: "#fafaf7", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
+            <div key={i} style={{ background: "#fafaf9", borderRadius: 10, padding: 12, marginBottom: 7, border: "1px solid " + C.bdr }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: C.pri, marginBottom: 6 }}>{a["fa" + i]}</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <div style={{ flex: 1, minWidth: 110 }}><ROSlider value={a["fe" + i]} min={1} max={5} label="الاندماج" /></div>
@@ -1358,8 +1327,8 @@ function Admin({ onLogout }) {
                     </div>
                   );
                 })}
-                <div style={{ marginBottom: 7 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>الجنس</label><select value={form.gender} onChange={function(e) { sForm(Object.assign({}, form, { gender: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#fafaf7" }}><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
-                <div style={{ marginBottom: 10 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>المرحلة</label><select value={form.lifeStage} onChange={function(e) { sForm(Object.assign({}, form, { lifeStage: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#fafaf7" }}>{Object.entries(ST).map(function(e) { return <option key={e[0]} value={e[0]}>{e[1]}</option>; })}</select></div>
+                <div style={{ marginBottom: 7 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>الجنس</label><select value={form.gender} onChange={function(e) { sForm(Object.assign({}, form, { gender: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#fff", color: C.tx }}><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+                <div style={{ marginBottom: 10 }}><label style={{ fontSize: 11, display: "block", marginBottom: 2, fontWeight: 600, color: C.txM }}>المرحلة</label><select value={form.lifeStage} onChange={function(e) { sForm(Object.assign({}, form, { lifeStage: e.target.value })); }} style={{ width: "100%", border: "1.5px solid " + C.bdr, borderRadius: 10, padding: "8px 10px", fontSize: 13, background: "#fafaf9" }}>{Object.entries(ST).map(function(e) { return <option key={e[0]} value={e[0]}>{e[1]}</option>; })}</select></div>
                 {error && <p style={{ color: C.err, fontSize: 11, marginBottom: 6 }}>{error}</p>}
                 <Btn onClick={addUser} v="gold" sz="sm" full>حفظ</Btn>
               </Crd>
@@ -1505,11 +1474,11 @@ function Admin({ onLogout }) {
                           <Crd sx={{ padding: 16 }}>
                             <div style={{ fontSize: 12, color: C.txM, fontWeight: 700, marginBottom: 8 }}>📋 ملخص البيانات المتوفرة:</div>
                             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                              <div style={{ background: "#fafaf7", borderRadius: 8, padding: 10, textAlign: "center" }}>
+                              <div style={{ background: "#fafaf9", borderRadius: 8, padding: 10, textAlign: "center" }}>
                                 <div style={{ fontSize: 20, fontWeight: 900, color: C.gold }}>{aExs.length}</div>
                                 <div style={{ fontSize: 11, color: C.txL }}>تمرين مُجاب</div>
                               </div>
-                              <div style={{ background: "#fafaf7", borderRadius: 8, padding: 10, textAlign: "center" }}>
+                              <div style={{ background: "#fafaf9", borderRadius: 8, padding: 10, textAlign: "center" }}>
                                 <div style={{ fontSize: 20, fontWeight: 900, color: C.pri }}>{Object.values(ans).reduce(function(s, v) { return s + Object.keys(v || {}).length; }, 0)}</div>
                                 <div style={{ fontSize: 11, color: C.txL }}>إجابة إجمالية</div>
                               </div>
@@ -1672,12 +1641,11 @@ export default function App() {
   function nav(v, d) { sV(v); sVd(d); window.scrollTo(0, 0); }
 
   if (ld) return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl", background: C.pri }}>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", fontFamily: "'Tajawal',sans-serif", direction: "rtl", background: C.bg }}>
       <style>{CSS_TEXT}</style>
-      <div style={{ textAlign: "center" }}>
-        <div style={{ width: 80, height: 80, borderRadius: 22, margin: "0 auto 18px", background: "linear-gradient(135deg," + C.gold + "," + C.goldL + ")", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, boxShadow: "0 8px 32px rgba(0,0,0,.3)", animation: "splashPulse 2s ease-in-out infinite" }}>🧭</div>
-        <h1 style={{ color: "#fff", fontSize: 20, fontWeight: 900, marginBottom: 6 }}>رسالتك</h1>
-        <p style={{ color: "rgba(255,255,255,.5)", fontSize: 13 }}>جارٍ التحميل...</p>
+      <div style={{ textAlign: "center", opacity: 0.6 }}>
+        <div style={{ fontSize: 36, marginBottom: 8 }}>🧭</div>
+        <p style={{ color: C.txL, fontSize: 13 }}>جارٍ التحميل...</p>
       </div>
     </div>
   );
